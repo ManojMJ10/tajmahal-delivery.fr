@@ -1,0 +1,673 @@
+"use client";
+
+import { Bike, ChevronLeft, ChevronRight, MapPin, Minus, Plus, ShoppingBag, Store } from "lucide-react";
+import { useMemo, useState, type ComponentType, type ReactNode } from "react";
+import { formatEuro, getDishName, getLocalizedCategoryLabel, getSpiceLabel, parsePrice, shouldShowSpiceLevel } from "@/lib/publicContent";
+import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
+import { PublicHeader } from "@/components/public/PublicHeader";
+
+interface OrderPageProps {
+  settings: AppSettings;
+  menuItems: MenuItem[];
+  cart: Record<string, number>;
+  notes: Record<string, string>;
+  language: Language;
+  setLanguage: (language: Language) => void;
+  onBack: () => void;
+  onNoteChange: (itemId: string, value: string) => void;
+  initialOption: string | null;
+  t: Record<string, string>;
+}
+
+function getCartItems(menuItems: MenuItem[], cart: Record<string, number>) {
+  return menuItems.filter((item) => Number(cart[item.id] || 0) > 0);
+}
+
+function getCartCount(cart: Record<string, number>) {
+  return Object.values(cart).reduce((total, quantity) => total + Number(quantity || 0), 0);
+}
+
+function getCartTotal(menuItems: MenuItem[], cart: Record<string, number>) {
+  return getCartItems(menuItems, cart).reduce(
+    (total, item) => total + parsePrice(item.price) * Number(cart[item.id] || 0),
+    0
+  );
+}
+
+function Field({
+  label,
+  help,
+  required = false,
+  children,
+}: {
+  label: string;
+  help?: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-base font-black text-stone-950">
+        {label} {required ? <span>*</span> : null}
+      </label>
+      {children}
+      {help ? <p className="mt-2 text-sm text-stone-600">{help}</p> : null}
+    </div>
+  );
+}
+
+function OrderOptionCard({
+  icon: Icon,
+  title,
+  description,
+  selected,
+  onClick,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`card-subtle-motion rounded-3xl border p-6 text-left transition-colors duration-150 ${
+        selected
+          ? "border-stone-900 bg-stone-900 text-white shadow-sm"
+          : "border-stone-200 bg-white text-stone-900 hover:bg-stone-50"
+      }`}
+    >
+      <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${selected ? "bg-white/15" : "bg-stone-100"}`}>
+        <Icon className={`h-7 w-7 ${selected ? "text-white" : "text-stone-700"}`} />
+      </div>
+      <h3 className="text-xl font-bold">{title}</h3>
+      <p className={`mt-2 text-sm leading-6 ${selected ? "text-stone-200" : "text-stone-600"}`}>{description}</p>
+    </button>
+  );
+}
+
+function GuestCounter({
+  guests,
+  onChange,
+}: {
+  guests: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-2xl border border-stone-400 bg-white px-4 py-3">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(1, guests - 1))}
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 hover:bg-stone-50"
+      >
+        <Minus className="h-4 w-4" />
+      </button>
+      <span className="text-2xl font-bold text-stone-950">{guests}</span>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(20, guests + 1))}
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 hover:bg-stone-50"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function Calendar({
+  language,
+  selectedDate,
+  onChange,
+}: {
+  language: Language;
+  selectedDate: string;
+  onChange: (value: string) => void;
+}) {
+  const todayInFrance = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  const currentYear = todayInFrance.getFullYear();
+  const currentMonth = todayInFrance.getMonth();
+  const currentDay = todayInFrance.getDate();
+  const monthNames =
+    language === "en"
+      ? ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+      : ["Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"];
+  const dayNames = language === "en" ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] : ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  const [month, setMonth] = useState(currentMonth);
+  const [year, setYear] = useState(currentYear);
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mondayOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const blanks = Array.from({ length: mondayOffset }, (_, index) => `blank-${index}`);
+  const days = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+
+  return (
+    <div className="mt-5 rounded-2xl border border-stone-300 bg-stone-50 p-4">
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() =>
+            setMonth((value) => {
+              if (value === 0) {
+                setYear((current) => current - 1);
+                return 11;
+              }
+              return value - 1;
+            })
+          }
+          className="rounded-full border border-stone-300 p-2 hover:bg-white"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <p className="font-black text-stone-800">
+          {monthNames[month]} {year}
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            setMonth((value) => {
+              if (value === 11) {
+                setYear((current) => current + 1);
+                return 0;
+              }
+              return value + 1;
+            })
+          }
+          className="rounded-full border border-stone-300 p-2 hover:bg-white"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs font-bold text-stone-500">
+        {dayNames.map((day) => <span key={day}>{day}</span>)}
+      </div>
+      <div className="mt-2 grid grid-cols-7 gap-2">
+        {blanks.map((blank) => <span key={blank} />)}
+        {days.map((day) => {
+          const dateValue = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const selected = selectedDate === dateValue;
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => onChange(dateValue)}
+              className={`aspect-square rounded-xl text-sm font-bold transition-colors duration-150 ${
+                selected ? "bg-stone-900 text-white" : "border border-stone-200 bg-white text-stone-800 hover:bg-stone-100"
+              }`}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TimeSlotSelect({
+  language,
+  selectedTime,
+  onChange,
+}: {
+  language: Language;
+  selectedTime: string;
+  onChange: (value: string) => void;
+}) {
+  const lunchSlots = ["11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00"];
+  const dinnerSlots = ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
+  const franceTime = new Date().toLocaleTimeString("en-GB", {
+    timeZone: "Europe/Paris",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const [hour, minute] = franceTime.split(":").map(Number);
+  const minutesNow = hour * 60 + minute;
+  const isLunchTime = minutesNow >= 11 * 60 && minutesNow <= 14 * 60 + 20;
+  const isDinnerTime = minutesNow >= 18 * 60 + 30 && minutesNow <= 23 * 60 + 30;
+
+  const renderSlots = (slots: string[], title: string, active: boolean) => (
+    <div className="mt-5 first:mt-0">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-black text-stone-700">{title}</p>
+        <span className={`rounded-full px-3 py-1 text-xs font-bold ${active ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-600"}`}>
+          {active ? (language === "en" ? "Open Now" : "Ouvert") : language === "en" ? "Later" : "Plus tard"}
+        </span>
+      </div>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+        {slots.map((time) => (
+          <button
+            key={time}
+            type="button"
+            onClick={() => onChange(time)}
+            className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-colors duration-150 ${
+              selectedTime === time
+                ? "border-stone-900 bg-stone-900 text-white"
+                : active
+                  ? "border-stone-300 bg-white text-stone-800 hover:bg-stone-50"
+                  : "border-stone-200 bg-stone-100 text-stone-500"
+            }`}
+          >
+            {time}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="rounded-2xl border border-stone-300 bg-stone-50 p-4">
+      {renderSlots(lunchSlots, language === "en" ? "Lunch: 11:00 - 14:20" : "Dejeuner : 11:00 - 14:20", isLunchTime)}
+      {renderSlots(dinnerSlots, language === "en" ? "Dinner: 18:30 - 23:30" : "Diner : 18:30 - 23:30", isDinnerTime)}
+    </div>
+  );
+}
+
+function AddressSearch({
+  placeholder,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const suggestions = [
+    "12 Avenue Jean Medecin, Nice, 06000",
+    "24 Rue Massena, Nice, 06000",
+    "7 Rue de France, Nice, 06000",
+    "18 Boulevard Gambetta, Nice, 06000",
+    "5 Promenade des Anglais, Nice, 06000",
+  ].filter((place) => place.toLowerCase().includes(value.toLowerCase()));
+
+  return (
+    <div className="grid gap-5 md:col-span-2">
+      <Field label={placeholder} required>
+        <div className="relative">
+          <input
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+            placeholder={placeholder}
+          />
+          {value && suggestions.length > 0 ? (
+            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-stone-300 bg-white shadow-lg">
+              {suggestions.map((place) => (
+                <button
+                  key={place}
+                  type="button"
+                  onClick={() => onChange(place)}
+                  className="flex w-full items-center gap-2 px-4 py-3 text-left text-base text-stone-900 hover:bg-stone-50"
+                >
+                  <MapPin className="h-4 w-4 text-stone-400" />
+                  {place}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+function CartSummary({
+  settings,
+  menuItems,
+  cart,
+  notes,
+  onNoteChange,
+  language,
+  t,
+}: {
+  settings: AppSettings;
+  menuItems: MenuItem[];
+  cart: Record<string, number>;
+  notes: Record<string, string>;
+  onNoteChange: (itemId: string, value: string) => void;
+  language: Language;
+  t: Record<string, string>;
+}) {
+  const items = getCartItems(menuItems, cart);
+  const total = getCartTotal(menuItems, cart);
+
+  if (items.length === 0) {
+    return <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">{t.emptyCart}</div>;
+  }
+
+  return (
+    <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
+      <div className="border-b border-stone-200 bg-stone-50 px-5 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-black text-stone-950">{t.selectedItems}</h3>
+            <p className="mt-1 text-sm text-stone-600">
+              {items.length} {t.items} · {getCartCount(cart)} {t.qty}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-bold uppercase tracking-wide text-stone-500">{t.estimatedTotal}</p>
+            <p className="text-2xl font-black text-stone-950">{formatEuro(total)}</p>
+          </div>
+        </div>
+      </div>
+      <div className="divide-y divide-stone-100">
+        {items.map((item) => {
+          const quantity = Number(cart[item.id] || 0);
+          const unitPrice = parsePrice(item.price);
+          const subtotal = unitPrice * quantity;
+
+          return (
+            <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_80px_180px_100px_120px] md:items-center">
+              <div className="flex items-center gap-3">
+                <img src={item.image} alt={getDishName(item, language)} className="h-14 w-14 rounded-2xl object-cover" />
+                <div>
+                  <p className="font-black text-stone-900">{getDishName(item, language)}</p>
+                  <p className="text-xs text-stone-500">
+                    {getLocalizedCategoryLabel(settings, item.category, language)}
+                    {shouldShowSpiceLevel(item) ? ` · ${getSpiceLabel(item.spice_level, language)}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-between text-sm md:block md:text-center">
+                <span className="font-bold text-stone-500 md:hidden">{t.qty}</span>
+                <span className="font-black text-stone-900">x{quantity}</span>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-stone-500 md:hidden">{t.itemNote}</label>
+                <input
+                  value={notes[item.id] || ""}
+                  onChange={(event) => onNoteChange(item.id, event.target.value)}
+                  placeholder={t.itemNotePlaceholder}
+                  className="h-11 w-full rounded-full border border-stone-300 bg-stone-50 px-4 text-sm text-stone-900 outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                />
+              </div>
+              <div className="flex justify-between text-sm md:block md:text-right">
+                <span className="font-bold text-stone-500 md:hidden">{t.price}</span>
+                <span className="font-semibold text-stone-700">{formatEuro(unitPrice)}</span>
+              </div>
+              <div className="flex justify-between text-sm md:block md:text-right">
+                <span className="font-bold text-stone-500 md:hidden">{t.subtotal}</span>
+                <span className="font-black text-stone-950">{formatEuro(subtotal)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="border-t border-stone-200 bg-stone-50 px-5 py-4">
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-black text-stone-950">{t.total}</span>
+          <span className="text-2xl font-black text-stone-950">{formatEuro(total)}</span>
+        </div>
+        <p className="mt-2 text-xs text-stone-500">{t.serviceNote}</p>
+      </div>
+    </div>
+  );
+}
+
+export function PublicOrderPage({
+  settings,
+  menuItems,
+  cart,
+  notes,
+  language,
+  setLanguage,
+  onBack,
+  onNoteChange,
+  initialOption,
+  t,
+}: OrderPageProps) {
+  const options = {
+    dineIn: t.dineIn,
+    takeAway: t.takeAway,
+    homeDelivery: t.homeDelivery,
+  };
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  const [selectedOption, setSelectedOption] = useState(initialOption || options.homeDelivery);
+  const [customerName, setCustomerName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [guestCount, setGuestCount] = useState(2);
+  const [date, setDate] = useState(
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
+  );
+  const [timeSlot, setTimeSlot] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isDineIn = selectedOption === t.dineIn;
+  const emailLabel = isDineIn ? t.emailForReservation : t.emailForReceipt;
+  const emailHelp = isDineIn ? t.reservationHelp : t.receiptHelp;
+  const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
+
+  const orderType: OrderType =
+    selectedOption === t.dineIn
+      ? "dine_in"
+      : selectedOption === t.takeAway
+        ? "takeaway"
+        : "home_delivery";
+
+  const canSubmit = cartItems.length > 0;
+
+  async function submitOrder() {
+    setSubmitError("");
+    setSubmitSuccess("");
+
+    if (!customerName.trim() || !phoneNumber.trim() || !email.trim() || !timeSlot.trim()) {
+      setSubmitError(language === "fr" ? "Veuillez remplir tous les champs obligatoires." : "Please complete all required fields.");
+      return;
+    }
+
+    if (orderType === "home_delivery" && !addressLine1.trim()) {
+      setSubmitError(language === "fr" ? "Veuillez saisir l'adresse de livraison." : "Please enter the delivery address.");
+      return;
+    }
+
+    if (!canSubmit) {
+      setSubmitError(language === "fr" ? "Ajoutez des plats avant d'envoyer la confirmation." : "Add menu items before sending the confirmation.");
+      return;
+    }
+
+    const payload: OrderConfirmationPayload = {
+      language,
+      orderType,
+      customerName: customerName.trim(),
+      phoneNumber: phoneNumber.trim(),
+      email: email.trim(),
+      addressLine1: addressLine1.trim(),
+      addressLine2: addressLine2.trim(),
+      guestCount,
+      date,
+      timeSlot: timeSlot.trim(),
+      notes: customerNotes.trim(),
+      items: cartItems.map((item) => ({
+        itemId: item.id,
+        quantity: Number(cart[item.id] || 0),
+        note: notes[item.id] || "",
+      })),
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/send-order-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to send confirmation.");
+      }
+
+      setSubmitSuccess(
+        language === "fr"
+          ? "Votre commande a ete envoyee. Un e-mail de confirmation a ete transmis au client et au restaurant."
+          : "Your order has been placed. Confirmation emails were sent to the customer and the restaurant."
+      );
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : language === "fr"
+            ? "L'e-mail de confirmation n'a pas pu etre envoye."
+            : "The confirmation email could not be sent."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f7f1e8]">
+      <PublicHeader
+        settings={settings}
+        language={language}
+        setLanguage={setLanguage}
+        onBack={onBack}
+        cartCount={getCartCount(cart)}
+        showBack
+        t={{
+          openToday: t.openToday,
+          backToMenu: t.backToMenu,
+          cart: t.cart,
+          dineIn: t.dineIn,
+        }}
+      />
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <div className="animate-soft-rise overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
+          <img
+            src="https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=1400&q=80"
+            alt="Indian and Pakistani food table"
+            className="h-56 w-full object-cover"
+          />
+        </div>
+        <div className="animate-soft-rise mt-10 text-center" style={{ animationDelay: "60ms" }}>
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.order}</p>
+          <h1 className="mt-3 text-4xl font-black text-stone-950 md:text-5xl">{t.orderQuestion}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-stone-600">{t.orderIntro}</p>
+        </div>
+        <div className="animate-soft-rise mt-10 grid gap-5 md:grid-cols-3" style={{ animationDelay: "110ms" }}>
+          <OrderOptionCard icon={Store} title={t.dineIn} description={settings.publicSite.dineInMessage} selected={selectedOption === t.dineIn} onClick={() => setSelectedOption(t.dineIn)} />
+          <OrderOptionCard icon={ShoppingBag} title={t.takeAway} description={settings.publicSite.takeawayMessage} selected={selectedOption === t.takeAway} onClick={() => setSelectedOption(t.takeAway)} />
+          <OrderOptionCard icon={Bike} title={t.homeDelivery} description={settings.publicSite.deliveryMessage} selected={selectedOption === t.homeDelivery} onClick={() => setSelectedOption(t.homeDelivery)} />
+        </div>
+        <section className="animate-soft-rise mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8" style={{ animationDelay: "160ms" }}>
+          <h2 className="text-2xl font-black text-stone-950">{selectedOption}</h2>
+          <p className="mt-2 text-stone-600">{t.customerDetails}</p>
+          {submitSuccess ? (
+            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+              {submitSuccess}
+            </div>
+          ) : null}
+          {submitError ? (
+            <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-medium text-rose-800">
+              {submitError}
+            </div>
+          ) : null}
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            {cartItems.length > 0 ? (
+              <div className="md:col-span-2">
+                <CartSummary
+                  settings={settings}
+                  menuItems={menuItems}
+                  cart={cart}
+                  notes={notes}
+                  onNoteChange={onNoteChange}
+                  language={language}
+                  t={t}
+                />
+              </div>
+            ) : null}
+            <Field label={t.customerName} required>
+              <input
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+                className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                placeholder="Alex Martin"
+              />
+            </Field>
+            <Field label={t.phoneNumber} required help={t.phoneHelp}>
+              <input
+                value={phoneNumber}
+                onChange={(event) => setPhoneNumber(event.target.value)}
+                className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                placeholder={settings.publicSite.phoneNumber}
+              />
+            </Field>
+            {selectedOption === t.homeDelivery ? (
+              <>
+                <AddressSearch
+                  placeholder={t.addressLine1Placeholder}
+                  value={addressLine1}
+                  onChange={setAddressLine1}
+                />
+                <Field label={t.addressLine2}>
+                  <input
+                    value={addressLine2}
+                    onChange={(event) => setAddressLine2(event.target.value)}
+                    className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300 md:col-span-2"
+                    placeholder={t.addressLine2Placeholder}
+                  />
+                </Field>
+              </>
+            ) : null}
+            {selectedOption === t.dineIn || selectedOption === t.takeAway ? (
+              <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
+                {selectedOption === t.dineIn ? (
+                  <Field label={t.guestsTime} required>
+                    <GuestCounter guests={guestCount} onChange={setGuestCount} />
+                    <Calendar language={language} selectedDate={date} onChange={setDate} />
+                  </Field>
+                ) : null}
+                <Field label={t.timeSlot} required>
+                  <TimeSlotSelect language={language} selectedTime={timeSlot} onChange={setTimeSlot} />
+                </Field>
+              </div>
+            ) : null}
+            {selectedOption === t.homeDelivery ? (
+              <div className="md:col-span-2">
+                <Field label={t.timeSlot} required>
+                  <TimeSlotSelect language={language} selectedTime={timeSlot} onChange={setTimeSlot} />
+                </Field>
+              </div>
+            ) : null}
+            <textarea
+              value={customerNotes}
+              onChange={(event) => setCustomerNotes(event.target.value)}
+              className="min-h-28 rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300 md:col-span-2"
+              placeholder={t.notes}
+            />
+            <div className="md:col-span-2">
+              <Field label={emailLabel} help={emailHelp}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-base outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                  placeholder={t.emailPlaceholder}
+                />
+              </Field>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={submitOrder}
+            disabled={isSubmitting}
+            className="mt-6 rounded-full bg-stone-900 px-8 py-3 font-bold text-white transition-colors duration-150 hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+          >
+            {isSubmitting ? t.sending : t.sendConfirmation}
+          </button>
+        </section>
+      </main>
+    </div>
+  );
+}
