@@ -179,13 +179,6 @@ export default function PublicMenuClient() {
                     <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
                     <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.phoneNumber}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={scrollToDishes}
-                    className="mt-6 w-fit rounded-full bg-stone-900 px-6 py-3 text-sm font-black text-white transition-colors duration-150 hover:bg-stone-800"
-                  >
-                    {t.startOrder}
-                  </button>
                 </div>
                 <div className="mx-auto overflow-hidden rounded-[1.75rem] border border-stone-200 bg-stone-100 shadow-md">
                   <img
