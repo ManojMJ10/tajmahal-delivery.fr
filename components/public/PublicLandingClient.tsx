@@ -103,42 +103,6 @@ export default function PublicLandingClient() {
           ))}
         </section>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[2rem] border border-stone-200 bg-white/90 p-6 shadow-[0_16px_36px_rgba(86,56,31,0.06)]">
-            <div className="flex items-center gap-5">
-              <img
-                src="/ornaments/marina-elephants.svg"
-                alt="Ornement inspiré de l'art indien"
-                className="h-24 w-24 shrink-0 rounded-[1.5rem] bg-[#f7f1e8] p-3"
-              />
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-stone-500">
-                  {language === "fr" ? "Esprit de la maison" : "House character"}
-                </p>
-                <h3 className="font-display mt-2 text-[2.15rem] font-semibold text-stone-950">
-                  {language === "fr" ? "Une adresse de marina, une table de tradition" : "A marina address with timeless tradition"}
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-[2rem] border border-stone-200 bg-white/90 p-6 shadow-[0_16px_36px_rgba(86,56,31,0.06)]">
-            <div className="flex items-center gap-5">
-              <img
-                src="/ornaments/marina-floral-burst.svg"
-                alt="Motif floral ornemental"
-                className="h-24 w-24 shrink-0 rounded-[1.5rem] bg-[#f7f1e8] p-2"
-              />
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-stone-500">
-                  {language === "fr" ? "Ambiance" : "Atmosphere"}
-                </p>
-                <h3 className="font-display mt-2 text-[2rem] font-semibold text-stone-950">
-                  {language === "fr" ? "Couleurs chaudes, détails raffinés" : "Warm tones with refined detail"}
-                </h3>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );
