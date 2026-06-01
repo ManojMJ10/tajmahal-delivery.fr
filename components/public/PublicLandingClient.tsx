@@ -27,18 +27,18 @@ export default function PublicLandingClient() {
         onBack={() => {}}
         t={t}
       />
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-24 sm:px-5">
-        <section className="animate-soft-rise landing-hero-sheen relative overflow-hidden rounded-[2rem] border border-[var(--page-line)] shadow-[0_24px_60px_rgba(86,56,31,0.08)]">
-          <div className="grid items-center gap-6 px-5 py-6 md:grid-cols-[minmax(0,1fr)_560px] md:px-10 md:py-10">
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-96px)] max-w-7xl flex-col justify-center px-4 pb-6 pt-16 sm:px-5 lg:pt-10">
+        <section className="animate-soft-rise landing-hero-sheen relative overflow-hidden rounded-[1.8rem] border border-[var(--page-line)] shadow-[0_20px_48px_rgba(86,56,31,0.08)]">
+          <div className="grid items-center gap-5 px-5 py-5 md:grid-cols-[minmax(0,1fr)_520px] md:px-8 md:py-7 xl:grid-cols-[minmax(0,1fr)_540px]">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.38em] text-stone-500">{t.heroLabel}</p>
-              <h2 className="font-display mt-3 max-w-xl text-[3rem] font-semibold leading-[0.92] text-stone-950 sm:text-[3.6rem] md:text-[5rem]">
+              <h2 className="font-display mt-3 max-w-xl text-[2.8rem] font-semibold leading-[0.92] text-stone-950 sm:text-[3.35rem] md:text-[4.4rem] xl:text-[4.7rem]">
                 {settings.publicSite.heroTitle[language]}
               </h2>
-              <p className="mt-4 max-w-xl text-base leading-7 text-stone-600 md:text-[1.08rem] md:leading-8">
+              <p className="mt-3 max-w-xl text-[15px] leading-7 text-stone-600 md:text-[1rem] md:leading-7">
                 {settings.publicSite.heroSubtitle[language]}
               </p>
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-600 md:text-base">
+              <div className="mt-5 flex flex-wrap gap-2.5 text-sm text-stone-600 md:text-[15px]">
                 <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.openingHours}</span>
                 <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
                 <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.phoneNumber}</span>
@@ -48,14 +48,14 @@ export default function PublicLandingClient() {
               <img
                 src="/restaurant/Taj_Mahal-16-1920w.png"
                 alt="Taj Mahal Marina restaurant exterior and terrace"
-                className="aspect-[16/10] h-full w-full object-cover"
+                className="aspect-[16/10] h-full w-full object-cover xl:aspect-[16/9.2]"
               />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(34,20,10,0.42)] to-transparent" />
             </div>
           </div>
         </section>
 
-        <section className="mt-5 grid gap-4 md:gap-5 lg:grid-cols-3">
+        <section className="mt-4 grid gap-4 md:grid-cols-3 md:gap-4">
           {[
             {
               href: "/order/dine-in",
@@ -82,7 +82,7 @@ export default function PublicLandingClient() {
             <Link
               key={title}
               href={href}
-              className={`animate-soft-rise rounded-[2rem] border p-6 text-left shadow-[0_16px_36px_rgba(86,56,31,0.07)] transition-transform duration-150 hover:-translate-y-0.5 md:p-7 ${
+              className={`animate-soft-rise rounded-[1.8rem] border p-5 text-left shadow-[0_16px_36px_rgba(86,56,31,0.07)] transition-transform duration-150 hover:-translate-y-0.5 md:min-h-[220px] md:p-5 ${
                 dark
                   ? "border-stone-900 bg-stone-900 text-white"
                   : "border-stone-200 bg-white/90 text-stone-900"
@@ -95,8 +95,8 @@ export default function PublicLandingClient() {
               >
                 <Icon className="h-7 w-7" />
               </span>
-              <h3 className="font-display mt-6 text-[1.85rem] font-semibold leading-none md:text-[2.15rem]">{title}</h3>
-              <p className={`mt-4 text-base leading-7 md:text-lg md:leading-8 ${dark ? "text-stone-200" : "text-stone-600"}`}>
+              <h3 className="font-display mt-5 text-[1.7rem] font-semibold leading-none md:text-[1.95rem]">{title}</h3>
+              <p className={`mt-3 text-[15px] leading-7 md:text-base md:leading-7 ${dark ? "text-stone-200" : "text-stone-600"}`}>
                 {description}
               </p>
             </Link>
