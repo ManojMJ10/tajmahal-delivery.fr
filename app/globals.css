@@ -91,35 +91,41 @@ select {
   font: inherit;
 }
 
-.landing-ornament-shell {
+.public-page-shell {
   position: relative;
   overflow: hidden;
+  background:
+    linear-gradient(180deg, #f8f0e4 0%, #f4eadc 100%);
 }
 
-.landing-ornament-shell::before,
-.landing-ornament-shell::after {
+.public-page-shell::before,
+.public-page-shell::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.landing-ornament-shell::before {
+.public-page-shell::before {
   background:
-    url("/ornaments/marina-floral-burst.svg") no-repeat left -90px top 220px / 260px,
-    url("/ornaments/marina-floral-burst.svg") no-repeat right -100px top 320px / 260px,
-    url("/ornaments/marina-elephants.svg") no-repeat center bottom 130px / 320px;
-  opacity: 0.16;
+    url("/ornaments/marina-border.svg") repeat-x center 76px / 860px 86px,
+    url("/ornaments/external/flower-ornament-red.svg") repeat-y left -10px top 150px / 112px auto,
+    url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -16px top 140px / 112px auto,
+    url("/ornaments/external/flower-sketch19.svg") no-repeat left 24px bottom 42px / 230px auto,
+    url("/ornaments/marina-floral-burst.svg") no-repeat right 36px bottom 52px / 240px auto;
+  opacity: 0.18;
 }
 
-.landing-ornament-shell::after {
+.public-page-shell::after {
   background:
-    url("/ornaments/marina-border.svg") repeat-x center bottom / 900px 100px,
-    linear-gradient(180deg, transparent 0%, rgba(245, 236, 223, 0.82) 75%, rgba(245, 236, 223, 1) 100%);
+    linear-gradient(180deg, transparent 0%, rgba(245, 236, 223, 0.56) 72%, rgba(245, 236, 223, 0.92) 100%);
   background-position:
-    center calc(100% - 4px),
     center center;
-  opacity: 0.95;
+  opacity: 1;
+}
+
+.landing-ornament-shell {
+  position: relative;
 }
 
 .landing-hero-sheen {
@@ -127,4 +133,24 @@ select {
     linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 246, 240, 0.95)),
     radial-gradient(circle at top left, rgba(166, 52, 46, 0.07), transparent 28%),
     radial-gradient(circle at bottom right, rgba(57, 90, 154, 0.07), transparent 30%);
+}
+
+@media (max-width: 1024px) {
+  .public-page-shell::before {
+    background:
+      url("/ornaments/marina-border.svg") repeat-x center 76px / 760px 74px,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat left -60px bottom 24px / 180px auto,
+      url("/ornaments/marina-floral-burst.svg") no-repeat right -54px bottom 40px / 180px auto;
+    opacity: 0.16;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-page-shell::before {
+    background:
+      url("/ornaments/marina-border.svg") repeat-x center 72px / 640px 60px,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat left -80px bottom 24px / 150px auto,
+      url("/ornaments/marina-floral-burst.svg") no-repeat right -86px bottom 30px / 150px auto;
+    opacity: 0.14;
+  }
 }

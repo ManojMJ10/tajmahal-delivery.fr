@@ -128,7 +128,7 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
     orderType === "takeaway" ? t.takeAway : orderType === "home_delivery" ? t.homeDelivery : t.dineIn;
 
   return (
-    <div className="min-h-screen bg-[#f7f1e8] text-stone-900">
+    <div className="public-page-shell min-h-screen bg-[#f7f1e8] text-stone-900">
       <PublicHeader
         settings={settings}
         language={language}
@@ -157,7 +157,7 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
           language={language}
         />
       </div>
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-10">
         <div className="animate-soft-rise rounded-[2rem] border border-stone-200 bg-white px-6 py-6 shadow-sm md:px-8">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.order}</p>
           <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

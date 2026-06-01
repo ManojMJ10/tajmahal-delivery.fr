@@ -18,7 +18,7 @@ export default function PublicLandingClient() {
   const t = translations[language];
 
   return (
-    <div className="landing-ornament-shell min-h-screen bg-[#f7f1e8] text-stone-900">
+    <div className="public-page-shell landing-ornament-shell min-h-screen bg-[#f7f1e8] text-stone-900">
       <PublicHeader
         settings={settings}
         language={language}
@@ -27,7 +27,7 @@ export default function PublicLandingClient() {
         onBack={() => {}}
         t={t}
       />
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pt-8 pb-12">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-12">
         <section className="animate-soft-rise landing-hero-sheen relative overflow-hidden rounded-[2.3rem] border border-[var(--page-line)] shadow-[0_24px_60px_rgba(86,56,31,0.08)]">
           <div className="grid items-center gap-6 px-6 py-7 md:grid-cols-[minmax(0,1fr)_560px] md:px-10 md:py-10">
             <div>

@@ -489,7 +489,7 @@ export function PublicOrderPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f1e8]">
+    <div className="public-page-shell min-h-screen bg-[#f7f1e8]">
       <PublicHeader
         settings={settings}
         language={language}
@@ -505,7 +505,7 @@ export function PublicOrderPage({
           dineIn: t.dineIn,
         }}
       />
-      <main className="mx-auto max-w-6xl px-4 py-10">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 pt-24 pb-10">
         <div className="animate-soft-rise overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
           <img
             src="https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=1400&q=80"
