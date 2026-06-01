@@ -15,7 +15,10 @@ function isValidPayload(payload: OrderConfirmationPayload) {
   if (!payload.phoneNumber.trim()) return false;
   if (!isValidEmail(payload.email.trim())) return false;
   if (!payload.timeSlot.trim()) return false;
-  if (!Array.isArray(payload.items) || payload.items.length === 0) return false;
+  if (!Array.isArray(payload.items)) return false;
+  if ((payload.orderType === "takeaway" || payload.orderType === "home_delivery") && payload.items.length === 0) {
+    return false;
+  }
   if (payload.orderType === "home_delivery" && !payload.addressLine1.trim()) return false;
   if ((payload.orderType === "dine_in" || payload.orderType === "takeaway") && !payload.date.trim()) return false;
   if (payload.orderType === "dine_in" && payload.guestCount < 1) return false;

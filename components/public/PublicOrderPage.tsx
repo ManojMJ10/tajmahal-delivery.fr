@@ -413,6 +413,7 @@ export function PublicOrderPage({
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
 
   const canSubmit = isDineIn ? true : cartItems.length > 0;
+  const needsMenuSelection = !isDineIn && cartItems.length === 0;
 
   async function submitOrder() {
     setSubmitError("");
@@ -429,7 +430,11 @@ export function PublicOrderPage({
     }
 
     if (!canSubmit) {
-      setSubmitError(language === "fr" ? "Ajoutez des plats avant d'envoyer la confirmation." : "Add menu items before sending the confirmation.");
+      setSubmitError(
+        language === "fr"
+          ? "Ajoutez des plats depuis le menu avant d'envoyer la confirmation."
+          : "Add menu items from the menu before sending the confirmation."
+      );
       return;
     }
 
@@ -531,6 +536,22 @@ export function PublicOrderPage({
               {submitError}
             </div>
           ) : null}
+          {needsMenuSelection ? (
+            <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 md:flex-row md:items-center md:justify-between">
+              <p className="font-medium">
+                {language === "fr"
+                  ? "Votre panier est vide. Choisissez vos plats sur le menu avant d'envoyer la commande."
+                  : "Your cart is empty. Choose dishes from the menu before sending the order."}
+              </p>
+              <button
+                type="button"
+                onClick={onBack}
+                className="rounded-full bg-stone-900 px-5 py-2.5 text-sm font-bold text-white transition-colors duration-150 hover:bg-stone-800"
+              >
+                {language === "fr" ? "Retour au menu" : "Back to menu"}
+              </button>
+            </div>
+          ) : null}
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             {cartItems.length > 0 ? (
               <div className="md:col-span-2">
@@ -619,7 +640,7 @@ export function PublicOrderPage({
           <button
             type="button"
             onClick={submitOrder}
-            disabled={isSubmitting}
+            disabled={isSubmitting || needsMenuSelection}
             className="mt-6 rounded-full bg-stone-900 px-8 py-3 font-bold text-white transition-colors duration-150 hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >
             {isSubmitting ? t.sending : t.sendConfirmation}
