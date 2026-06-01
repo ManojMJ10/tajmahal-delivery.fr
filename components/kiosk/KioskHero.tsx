@@ -13,6 +13,8 @@ export function KioskHero({
   setLanguage: (language: Language) => void;
 }) {
   const t = translations[language];
+  const kioskSubtitle =
+    language === "fr" ? "Restaurant indien et pakistanais" : "Indian & Pakistani Restaurant";
 
   return (
     <section className="grid gap-5 rounded-[2rem] border-2 border-[#7f4a1f]/20 bg-[linear-gradient(135deg,#fff8ef_0%,#f5e7cf_55%,#f0dcc1_100%)] p-8 shadow-[0_22px_55px_rgba(82,50,19,0.14)] lg:grid-cols-[1.45fr_0.75fr]">
@@ -23,7 +25,7 @@ export function KioskHero({
         <h1 className="mt-3 font-serif text-6xl font-bold tracking-tight text-stone-950 lg:text-8xl">
           {settings.kiosk.heading}
         </h1>
-        <h2 className="mt-4 text-2xl font-semibold text-[#7a4d25] lg:text-4xl">{settings.kiosk.subtitle}</h2>
+        <h2 className="mt-4 text-2xl font-semibold text-[#7a4d25] lg:text-4xl">{kioskSubtitle}</h2>
         <div className="mt-6 grid gap-3 text-base font-semibold text-stone-800">
           <div className="rounded-[1.5rem] border-2 border-[#d7c19f] bg-white px-5 py-4 shadow-[0_12px_24px_rgba(82,50,19,0.08)]">
             <p className="text-xs font-black uppercase tracking-[0.3em] text-[#8f5525]">
@@ -51,7 +53,9 @@ export function KioskHero({
             <div>
               <p className="text-sm font-black uppercase tracking-[0.35em] text-[#8f5525]">{t.bilingualMenu}</p>
               <p className="mt-2 text-sm font-medium text-stone-600">
-                {language === "fr" ? "Français par défaut, appuyez pour English." : "English active, tap for Français."}
+                {language === "fr"
+                  ? "Le français est affiché par défaut. Appuyez pour passer en anglais."
+                  : "English is active. Tap to switch to French."}
               </p>
             </div>
             <div className="rounded-full bg-white/80 px-3 py-1 text-xs font-black uppercase tracking-[0.25em] text-[#8f5525]">

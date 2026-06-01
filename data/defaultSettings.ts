@@ -2,7 +2,7 @@ import type { AppSettings } from "@/lib/types";
 
 export const defaultSettings: AppSettings = {
   "restaurantName": "Taj Mahal",
-  "cuisineLabel": "Indian & Pakistani Restaurant",
+  "cuisineLabel": "Restaurant indien et pakistanais",
   "location": "Villeneuve-Loubet, France",
   "categories": [
     {
@@ -114,26 +114,26 @@ export const defaultSettings: AppSettings = {
   "publicSite": {
     "phoneNumber": "04 93 73 07 87",
     "restaurantAddress": "The Marina, 1001 Battery Avenue, 06270 Villeneuve-Loubet",
-    "openingHours": "Lunch 11:00 - 14:30, Dinner 18:30 - 23:00",
-    "deliveryMessage": "Fresh delivery across Nice and nearby areas.",
-    "takeawayMessage": "Quick collection with hot packing.",
-    "dineInMessage": "Comfortable dining room for lunch and evening service.",
+    "openingHours": "Déjeuner 11:00 - 14:30, Dîner 18:30 - 23:00",
+    "deliveryMessage": "Livraison fraîche et soignée à Nice et dans les environs.",
+    "takeawayMessage": "Retrait rapide avec emballage chaud et soigné.",
+    "dineInMessage": "Salle confortable pour le déjeuner et le service du soir.",
     "heroTitle": {
       "en": "Authentic Indian & Pakistani Menu",
       "fr": "Menu indien et pakistanais authentique"
     },
     "heroSubtitle": {
       "en": "Official restaurant menu from Taj Mahal in Nice.",
-      "fr": "La carte officielle du restaurant Taj Mahal à Nice."
+      "fr": "La carte officielle du restaurant Taj Mahal Marina, près de Nice."
     }
   },
   "kiosk": {
     "heading": "Taj Mahal",
-    "subtitle": "Indian & Pakistani Restaurant",
+    "subtitle": "Restaurant indien et pakistanais",
     "rotationSpeedMs": 6000,
     "categoryRotationSpeedMs": 10000,
     "showQrCode": true,
-    "qrCodeUrl": "https://TajMahal-delivery.fr",
+    "qrCodeUrl": "https://www.tajmahalmarina-delivery.fr",
     "themeMode": "warm-dark",
     "highlightCategory": true,
     "showAllergens": true,

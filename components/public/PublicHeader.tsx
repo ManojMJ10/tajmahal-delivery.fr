@@ -31,6 +31,9 @@ export function PublicHeader({
   t,
   setLanguage,
 }: PublicHeaderProps) {
+  const cuisineLabel =
+    language === "fr" ? "Restaurant indien et pakistanais" : "Indian & Pakistani Restaurant";
+
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
@@ -52,7 +55,7 @@ export function PublicHeader({
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" /> {t.openToday}
           </span>
-          <span>{settings.cuisineLabel}</span>
+          <span>{cuisineLabel}</span>
           <span>{settings.publicSite.phoneNumber}</span>
         </div>
 

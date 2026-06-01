@@ -142,7 +142,7 @@ export function useSettings() {
 }
 
 export function useLanguage() {
-  return subscribeKey<Language>(LANGUAGE_KEY, getLanguage, "en");
+  return subscribeKey<Language>(LANGUAGE_KEY, getLanguage, "fr");
 }
 
 export function initializeStore() {
