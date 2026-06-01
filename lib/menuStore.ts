@@ -10,7 +10,7 @@ const SETTINGS_KEY = "tajmahal-settings";
 const LANGUAGE_KEY = "tajmahal-language";
 const CATALOG_VERSION_KEY = "tajmahal-catalog-version";
 const STORE_EVENT = "tajmahal-store-updated";
-const CATALOG_VERSION = "2026-05-27-official-menu-v2";
+const CATALOG_VERSION = "2026-06-01-marina-ui-refresh-v3";
 
 type StoreKey = typeof MENU_KEY | typeof SETTINGS_KEY | typeof LANGUAGE_KEY;
 

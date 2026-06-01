@@ -43,29 +43,29 @@ export function PublicCategoryTabs({
             </h2>
           </div>
         ) : null}
-        <div
-          className={`${
-            compact
-              ? "flex flex-wrap gap-2"
-              : "mt-5 flex flex-wrap gap-2.5 xl:grid xl:auto-cols-max xl:grid-flow-col xl:grid-rows-2 xl:gap-3"
-          }`}
-        >
-          {visibleCategories.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => setSelectedCategory(category.id)}
-              className={`rounded-full border-2 font-bold transition-colors duration-150 ${
-                compact ? "px-4 py-2 text-sm" : "px-4 py-2.5 text-sm sm:px-5 sm:text-[15px]"
-              } ${
-                selectedCategory === category.id
-                  ? "border-stone-950 bg-stone-950 text-white shadow-sm"
-                  : "border-stone-300 bg-white text-stone-800 hover:bg-stone-50"
-              }`}
-            >
-              {getLocalizedCategoryLabel(settings, category.id, language)}
-            </button>
-          ))}
+        <div className={compact ? "" : "mt-5"}>
+          <div
+            className={`no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 ${
+              compact ? "gap-2" : "gap-2.5 sm:gap-3"
+            }`}
+          >
+            {visibleCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setSelectedCategory(category.id)}
+                className={`shrink-0 snap-start whitespace-nowrap rounded-full border-2 font-bold transition-colors duration-150 ${
+                  compact ? "px-4 py-2 text-sm" : "px-4 py-2.5 text-sm sm:px-5 sm:text-[15px]"
+                } ${
+                  selectedCategory === category.id
+                    ? "border-stone-950 bg-stone-950 text-white shadow-sm"
+                    : "border-stone-300 bg-white text-stone-800 hover:bg-stone-50"
+                }`}
+              >
+                {getLocalizedCategoryLabel(settings, category.id, language)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>

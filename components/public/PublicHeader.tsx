@@ -38,9 +38,9 @@ export function PublicHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+      <div className="mx-auto flex max-w-7xl items-start justify-between gap-4 px-4 py-4 md:items-center">
         <button type="button" onClick={onBack} className="text-left">
-          <h1 className="font-display text-[2.25rem] font-semibold leading-none tracking-[-0.05em] text-stone-950 md:text-[2.85rem]">
+          <h1 className="font-display text-[2.35rem] font-semibold leading-none tracking-[-0.05em] text-stone-950 md:text-[3.15rem]">
             {settings.restaurantName}
           </h1>
           <div className="mt-1 space-y-1 text-xs text-stone-500 md:text-sm">
@@ -53,7 +53,7 @@ export function PublicHeader({
           </div>
         </button>
 
-        <div className="hidden items-center gap-6 text-sm font-medium text-stone-600 md:flex">
+        <div className="hidden items-center gap-6 text-sm font-medium text-stone-600 xl:flex">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" /> {t.openToday}
           </span>
@@ -61,7 +61,7 @@ export function PublicHeader({
           <span>{settings.publicSite.phoneNumber}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 self-start md:self-center">
           <button
             type="button"
             onClick={() => setLanguage(language === "en" ? "fr" : "en")}

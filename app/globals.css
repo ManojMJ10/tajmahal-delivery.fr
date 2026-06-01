@@ -16,6 +16,15 @@ html {
   scroll-behavior: smooth;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   background:
@@ -139,8 +148,10 @@ select {
   .public-page-shell::before {
     background:
       url("/ornaments/marina-border.svg") repeat-x center 76px / 760px 74px,
-      url("/ornaments/external/flower-sketch19.svg") no-repeat left -60px bottom 24px / 180px auto,
-      url("/ornaments/marina-floral-burst.svg") no-repeat right -54px bottom 40px / 180px auto;
+      url("/ornaments/external/flower-ornament-red.svg") repeat-y left -30px top 150px / 92px auto,
+      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -34px top 150px / 92px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat left -80px bottom 24px / 180px auto,
+      url("/ornaments/marina-floral-burst.svg") no-repeat right -76px bottom 40px / 180px auto;
     opacity: 0.16;
   }
 }
@@ -148,9 +159,19 @@ select {
 @media (max-width: 768px) {
   .public-page-shell::before {
     background:
-      url("/ornaments/marina-border.svg") repeat-x center 72px / 640px 60px,
-      url("/ornaments/external/flower-sketch19.svg") no-repeat left -80px bottom 24px / 150px auto,
-      url("/ornaments/marina-floral-burst.svg") no-repeat right -86px bottom 30px / 150px auto;
-    opacity: 0.14;
+      url("/ornaments/marina-border.svg") repeat-x center 76px / 560px 48px,
+      url("/ornaments/external/flower-ornament-red.svg") repeat-y left -34px top 132px / 72px auto,
+      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -42px top 132px / 70px auto;
+    opacity: 0.1;
+  }
+}
+
+@media (max-width: 640px) {
+  .public-page-shell::before {
+    background:
+      url("/ornaments/marina-border.svg") repeat-x center 84px / 480px 42px,
+      url("/ornaments/external/flower-ornament-red.svg") repeat-y left -44px top 126px / 62px auto,
+      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -48px top 126px / 60px auto;
+    opacity: 0.08;
   }
 }
