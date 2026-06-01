@@ -38,19 +38,25 @@ export function PublicCategoryTabs({
             <p className="text-sm font-black uppercase tracking-[0.35em] text-stone-500">
               {language === "fr" ? "Catégories" : "Categories"}
             </p>
-            <h2 className="mt-2 font-serif text-4xl font-bold tracking-tight text-stone-950 md:text-5xl">
+            <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl md:text-5xl">
               {language === "fr" ? "Nos Plats" : "Our Dishes"}
             </h2>
           </div>
         ) : null}
-        <div className={`flex flex-wrap gap-3 ${compact ? "" : "mt-5"}`}>
+        <div
+          className={`${
+            compact
+              ? "flex flex-wrap gap-2"
+              : "mt-5 flex flex-wrap gap-2.5 xl:grid xl:auto-cols-max xl:grid-flow-col xl:grid-rows-2 xl:gap-3"
+          }`}
+        >
           {visibleCategories.map((category) => (
             <button
               key={category.id}
               type="button"
               onClick={() => setSelectedCategory(category.id)}
               className={`rounded-full border-2 font-bold transition-colors duration-150 ${
-                compact ? "px-4 py-2 text-sm" : "px-5 py-3 text-base"
+                compact ? "px-4 py-2 text-sm" : "px-4 py-2.5 text-sm sm:px-5 sm:text-[15px]"
               } ${
                 selectedCategory === category.id
                   ? "border-stone-950 bg-stone-950 text-white shadow-sm"
