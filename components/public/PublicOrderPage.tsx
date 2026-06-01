@@ -1,7 +1,7 @@
 "use client";
 
-import { Bike, ChevronLeft, ChevronRight, MapPin, Minus, Plus, ShoppingBag, Store } from "lucide-react";
-import { useMemo, useState, type ComponentType, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, MapPin, Minus, Plus } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
 import { formatEuro, getDishName, getLocalizedCategoryLabel, getSpiceLabel, parsePrice, shouldShowSpiceLevel } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
 import { PublicHeader } from "@/components/public/PublicHeader";
@@ -15,7 +15,9 @@ interface OrderPageProps {
   setLanguage: (language: Language) => void;
   onBack: () => void;
   onNoteChange: (itemId: string, value: string) => void;
-  initialOption: string | null;
+  orderType: OrderType;
+  backLabel?: string;
+  onSubmitSuccess?: () => void;
   t: Record<string, string>;
 }
 
@@ -53,38 +55,6 @@ function Field({
       {children}
       {help ? <p className="mt-2 text-sm text-stone-600">{help}</p> : null}
     </div>
-  );
-}
-
-function OrderOptionCard({
-  icon: Icon,
-  title,
-  description,
-  selected,
-  onClick,
-}: {
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`card-subtle-motion rounded-3xl border p-6 text-left transition-colors duration-150 ${
-        selected
-          ? "border-stone-900 bg-stone-900 text-white shadow-sm"
-          : "border-stone-200 bg-white text-stone-900 hover:bg-stone-50"
-      }`}
-    >
-      <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${selected ? "bg-white/15" : "bg-stone-100"}`}>
-        <Icon className={`h-7 w-7 ${selected ? "text-white" : "text-stone-700"}`} />
-      </div>
-      <h3 className="text-xl font-bold">{title}</h3>
-      <p className={`mt-2 text-sm leading-6 ${selected ? "text-stone-200" : "text-stone-600"}`}>{description}</p>
-    </button>
   );
 }
 
@@ -415,22 +385,18 @@ export function PublicOrderPage({
   setLanguage,
   onBack,
   onNoteChange,
-  initialOption,
+  orderType,
+  backLabel,
+  onSubmitSuccess,
   t,
 }: OrderPageProps) {
-  const options = {
-    dineIn: t.dineIn,
-    takeAway: t.takeAway,
-    homeDelivery: t.homeDelivery,
-  };
-  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const [selectedOption, setSelectedOption] = useState(initialOption || options.homeDelivery);
   const [customerName, setCustomerName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [guestCount, setGuestCount] = useState(2);
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   const [date, setDate] = useState(
     `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
   );
@@ -439,19 +405,14 @@ export function PublicOrderPage({
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isDineIn = selectedOption === t.dineIn;
+  const isDineIn = orderType === "dine_in";
+  const selectedOption =
+    orderType === "dine_in" ? t.dineIn : orderType === "takeaway" ? t.takeAway : t.homeDelivery;
   const emailLabel = isDineIn ? t.emailForReservation : t.emailForReceipt;
   const emailHelp = isDineIn ? t.reservationHelp : t.receiptHelp;
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
 
-  const orderType: OrderType =
-    selectedOption === t.dineIn
-      ? "dine_in"
-      : selectedOption === t.takeAway
-        ? "takeaway"
-        : "home_delivery";
-
-  const canSubmit = cartItems.length > 0;
+  const canSubmit = isDineIn ? true : cartItems.length > 0;
 
   async function submitOrder() {
     setSubmitError("");
@@ -513,6 +474,7 @@ export function PublicOrderPage({
           ? "Votre commande a ete envoyee. Un e-mail de confirmation a ete transmis au client et au restaurant."
           : "Your order has been placed. Confirmation emails were sent to the customer and the restaurant."
       );
+      onSubmitSuccess?.();
     } catch (error) {
       setSubmitError(
         error instanceof Error
@@ -535,6 +497,7 @@ export function PublicOrderPage({
         onBack={onBack}
         cartCount={getCartCount(cart)}
         showBack
+        backLabel={backLabel}
         t={{
           openToday: t.openToday,
           backToMenu: t.backToMenu,
@@ -555,12 +518,7 @@ export function PublicOrderPage({
           <h1 className="mt-3 text-4xl font-black text-stone-950 md:text-5xl">{t.orderQuestion}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-stone-600">{t.orderIntro}</p>
         </div>
-        <div className="animate-soft-rise mt-10 grid gap-5 md:grid-cols-3" style={{ animationDelay: "110ms" }}>
-          <OrderOptionCard icon={Store} title={t.dineIn} description={settings.publicSite.dineInMessage} selected={selectedOption === t.dineIn} onClick={() => setSelectedOption(t.dineIn)} />
-          <OrderOptionCard icon={ShoppingBag} title={t.takeAway} description={settings.publicSite.takeawayMessage} selected={selectedOption === t.takeAway} onClick={() => setSelectedOption(t.takeAway)} />
-          <OrderOptionCard icon={Bike} title={t.homeDelivery} description={settings.publicSite.deliveryMessage} selected={selectedOption === t.homeDelivery} onClick={() => setSelectedOption(t.homeDelivery)} />
-        </div>
-        <section className="animate-soft-rise mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8" style={{ animationDelay: "160ms" }}>
+        <section className="animate-soft-rise mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8" style={{ animationDelay: "110ms" }}>
           <h2 className="text-2xl font-black text-stone-950">{selectedOption}</h2>
           <p className="mt-2 text-stone-600">{t.customerDetails}</p>
           {submitSuccess ? (
@@ -603,7 +561,7 @@ export function PublicOrderPage({
                 placeholder={settings.publicSite.phoneNumber}
               />
             </Field>
-            {selectedOption === t.homeDelivery ? (
+            {orderType === "home_delivery" ? (
               <>
                 <AddressSearch
                   placeholder={t.addressLine1Placeholder}
@@ -620,9 +578,9 @@ export function PublicOrderPage({
                 </Field>
               </>
             ) : null}
-            {selectedOption === t.dineIn || selectedOption === t.takeAway ? (
+            {orderType === "dine_in" || orderType === "takeaway" ? (
               <div className="grid gap-4 md:col-span-2 md:grid-cols-2">
-                {selectedOption === t.dineIn ? (
+                {orderType === "dine_in" ? (
                   <Field label={t.guestsTime} required>
                     <GuestCounter guests={guestCount} onChange={setGuestCount} />
                     <Calendar language={language} selectedDate={date} onChange={setDate} />
@@ -633,7 +591,7 @@ export function PublicOrderPage({
                 </Field>
               </div>
             ) : null}
-            {selectedOption === t.homeDelivery ? (
+            {orderType === "home_delivery" ? (
               <div className="md:col-span-2">
                 <Field label={t.timeSlot} required>
                   <TimeSlotSelect language={language} selectedTime={timeSlot} onChange={setTimeSlot} />

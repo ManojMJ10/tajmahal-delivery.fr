@@ -1,6 +1,5 @@
-import PublicMenuClient from "@/components/public/PublicMenuClient";
+import PublicLandingClient from "@/components/public/PublicLandingClient";
 
 export default function Page() {
-  return <PublicMenuClient />;
+  return <PublicLandingClient />;
 }
-

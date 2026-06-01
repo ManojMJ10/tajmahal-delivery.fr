@@ -1,26 +1,28 @@
 "use client";
 
-import { Bike, Search, ShoppingBag, Store } from "lucide-react";
+import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { initializeStore, saveLanguage, useLanguage, useMenuItems, useSettings } from "@/lib/menuStore";
 import { getDishDescription, getDishName, translations } from "@/lib/publicContent";
 import { PublicCategoryTabs } from "@/components/public/PublicCategoryTabs";
 import { PublicHeader } from "@/components/public/PublicHeader";
 import { PublicMenuCard } from "@/components/public/PublicMenuCard";
-import { PublicOrderPage } from "@/components/public/PublicOrderPage";
+import type { OrderType } from "@/lib/types";
+import { getPublicCartState, savePublicCartState, usePublicCartState } from "@/lib/publicCartStore";
 
-type PageMode = "menu" | "order";
+interface PublicMenuClientProps {
+  orderType: OrderType;
+}
 
-export default function PublicMenuClient() {
+export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
   const settings = useSettings();
   const menuItems = useMenuItems();
   const language = useLanguage();
-  const [page, setPage] = useState<PageMode>("menu");
-  const [cart, setCart] = useState<Record<string, number>>({});
-  const [notes, setNotes] = useState<Record<string, string>>({});
+  const router = useRouter();
+  const { cart, notes } = usePublicCartState();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [initialOrderOption, setInitialOrderOption] = useState<string | null>(null);
   const dishesSectionRef = useRef<HTMLDivElement | null>(null);
   const categoryTabsRef = useRef<HTMLDivElement | null>(null);
   const didMountCategoryRef = useRef(false);
@@ -35,6 +37,7 @@ export default function PublicMenuClient() {
     () => menuItems.filter((item) => item.available && item.show_on_public),
     [menuItems]
   );
+
   const filteredItems = useMemo(
     () =>
       publicMenuItems.filter((item) => {
@@ -51,49 +54,38 @@ export default function PublicMenuClient() {
 
   const cartCount = Object.values(cart).reduce((total, quantity) => total + Number(quantity || 0), 0);
 
+  const persistCart = (nextCart: Record<string, number>, nextNotes: Record<string, string>) => {
+    savePublicCartState({
+      cart: nextCart,
+      notes: nextNotes,
+    });
+  };
+
   const increaseCart = (itemId: string) => {
-    setCart((current) => ({ ...current, [itemId]: (current[itemId] || 0) + 1 }));
+    const currentState = getPublicCartState();
+    persistCart(
+      { ...currentState.cart, [itemId]: (currentState.cart[itemId] || 0) + 1 },
+      currentState.notes
+    );
   };
 
   const decreaseCart = (itemId: string) => {
-    setCart((current) => {
-      const nextQuantity = Math.max(0, (current[itemId] || 0) - 1);
-      const updated = { ...current, [itemId]: nextQuantity };
-      if (nextQuantity === 0) delete updated[itemId];
-      return updated;
-    });
+    const currentState = getPublicCartState();
+    const nextQuantity = Math.max(0, (currentState.cart[itemId] || 0) - 1);
+    const nextCart = { ...currentState.cart, [itemId]: nextQuantity };
+
+    if (nextQuantity === 0) delete nextCart[itemId];
+
+    persistCart(nextCart, currentState.notes);
   };
 
   const updateNote = (itemId: string, note: string) => {
-    setNotes((current) => {
-      const updated = { ...current, [itemId]: note };
-      if (!note.trim()) delete updated[itemId];
-      return updated;
-    });
-  };
+    const currentState = getPublicCartState();
+    const nextNotes = { ...currentState.notes, [itemId]: note };
 
-  const scrollToDishes = () => {
-    dishesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+    if (!note.trim()) delete nextNotes[itemId];
 
-  const openCart = () => {
-    setInitialOrderOption(null);
-    setPage("order");
-  };
-
-  const openDineIn = () => {
-    setInitialOrderOption(t.dineIn);
-    setPage("order");
-  };
-
-  const openTakeAway = () => {
-    setInitialOrderOption(t.takeAway);
-    setPage("order");
-  };
-
-  const openHomeDelivery = () => {
-    setInitialOrderOption(t.homeDelivery);
-    setPage("order");
+    persistCart(currentState.cart, nextNotes);
   };
 
   useEffect(() => {
@@ -132,22 +124,8 @@ export default function PublicMenuClient() {
     return () => observer.disconnect();
   }, [selectedCategory]);
 
-  if (page === "order") {
-    return (
-      <PublicOrderPage
-        settings={settings}
-        menuItems={publicMenuItems}
-        cart={cart}
-        notes={notes}
-        language={language}
-        setLanguage={saveLanguage}
-        onBack={() => setPage("menu")}
-        onNoteChange={updateNote}
-        initialOption={initialOrderOption}
-        t={t}
-      />
-    );
-  }
+  const orderTypeLabel =
+    orderType === "takeaway" ? t.takeAway : orderType === "home_delivery" ? t.homeDelivery : t.dineIn;
 
   return (
     <div className="min-h-screen bg-[#f7f1e8] text-stone-900">
@@ -156,91 +134,10 @@ export default function PublicMenuClient() {
         language={language}
         setLanguage={saveLanguage}
         cartCount={cartCount}
-        onBack={() => setPage("menu")}
-        onCartClick={openCart}
-        onDineInClick={openDineIn}
+        onBack={() => router.push("/")}
+        onCartClick={() => router.push(`/order/${orderType === "home_delivery" ? "home-delivery" : "takeaway"}`)}
         t={t}
       />
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        {selectedCategory === "all" ? (
-          <>
-            <section className="animate-soft-rise relative overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
-              <div className="grid items-center gap-4 px-6 py-8 md:grid-cols-[minmax(0,1fr)_500px] md:px-10 md:py-10">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.heroLabel}</p>
-                  <h2 className="mt-3 max-w-md text-3xl font-black leading-[1.05] text-stone-950 md:text-4xl">
-                    {settings.publicSite.heroTitle[language]}
-                  </h2>
-                  <p className="mt-4 max-w-sm text-base leading-6 text-stone-600">
-                    {settings.publicSite.heroSubtitle[language]}
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-600">
-                    <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.openingHours}</span>
-                    <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
-                    <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.phoneNumber}</span>
-                  </div>
-                </div>
-                <div className="mx-auto overflow-hidden rounded-[1.75rem] border border-stone-200 bg-stone-100 shadow-md">
-                  <img
-                    src="/restaurant/Taj_Mahal-16-1920w.png"
-                    alt="Taj Mahal restaurant exterior and terrace"
-                    className="aspect-[16/10] h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mt-6 grid gap-5 lg:grid-cols-3">
-              {[
-                {
-                  icon: Store,
-                  title: t.dineIn,
-                  description: settings.publicSite.dineInMessage,
-                  onClick: openDineIn,
-                  dark: false,
-                },
-                {
-                  icon: ShoppingBag,
-                  title: t.takeAway,
-                  description: settings.publicSite.takeawayMessage,
-                  onClick: openTakeAway,
-                  dark: false,
-                },
-                {
-                  icon: Bike,
-                  title: t.homeDelivery,
-                  description: settings.publicSite.deliveryMessage,
-                  onClick: openHomeDelivery,
-                  dark: true,
-                },
-              ].map(({ icon: Icon, title, description, onClick, dark }) => (
-                <button
-                  key={title}
-                  type="button"
-                  onClick={onClick}
-                  className={`animate-soft-rise rounded-[2rem] border p-6 text-left shadow-sm transition-transform duration-150 hover:-translate-y-0.5 ${
-                    dark
-                      ? "border-stone-900 bg-stone-900 text-white"
-                      : "border-stone-200 bg-white text-stone-900"
-                  }`}
-                >
-                  <span
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                      dark ? "bg-white/10 text-white" : "bg-stone-100 text-stone-700"
-                    }`}
-                  >
-                    <Icon className="h-6 w-6" />
-                  </span>
-                  <h3 className="mt-6 text-2xl font-black">{title}</h3>
-                  <p className={`mt-3 text-lg leading-8 ${dark ? "text-stone-200" : "text-stone-600"}`}>
-                    {description}
-                  </p>
-                </button>
-              ))}
-            </section>
-          </>
-        ) : null}
-      </main>
       {showCompactCategory ? (
         <PublicCategoryTabs
           settings={settings}
@@ -261,11 +158,28 @@ export default function PublicMenuClient() {
         />
       </div>
       <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="animate-soft-rise rounded-[2rem] border border-stone-200 bg-white px-6 py-6 shadow-sm md:px-8">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.order}</p>
+          <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="text-3xl font-black text-stone-950 md:text-4xl">{orderTypeLabel}</h1>
+              <p className="mt-2 max-w-2xl text-stone-600">
+                {orderType === "takeaway" ? settings.publicSite.takeawayMessage : settings.publicSite.deliveryMessage}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(`/order/${orderType === "home_delivery" ? "home-delivery" : "takeaway"}`)}
+              className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-stone-800"
+            >
+              {t.cart}
+            </button>
+          </div>
+        </div>
+
         <div
           ref={dishesSectionRef}
-          className={`animate-soft-rise flex flex-col justify-between gap-4 md:flex-row md:items-center ${
-            selectedCategory === "all" ? "mt-8 scroll-mt-36" : "mt-6 scroll-mt-28"
-          }`}
+          className="animate-soft-rise mt-8 flex flex-col justify-between gap-4 md:flex-row md:items-center scroll-mt-28"
           style={{ animationDelay: "70ms" }}
         >
           <div>

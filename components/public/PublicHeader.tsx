@@ -11,6 +11,7 @@ interface PublicHeaderProps {
   onBack: () => void;
   onCartClick?: () => void;
   onDineInClick?: () => void;
+  backLabel?: string;
   t: {
     openToday: string;
     backToMenu: string;
@@ -28,6 +29,7 @@ export function PublicHeader({
   onBack,
   onCartClick,
   onDineInClick,
+  backLabel,
   t,
   setLanguage,
 }: PublicHeaderProps) {
@@ -85,9 +87,9 @@ export function PublicHeader({
               onClick={onBack}
               className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold hover:bg-stone-50"
             >
-              {t.backToMenu}
+              {backLabel || t.backToMenu}
             </button>
-          ) : (
+          ) : onCartClick ? (
             <button
               type="button"
               onClick={onCartClick}
@@ -101,7 +103,7 @@ export function PublicHeader({
                 </span>
               ) : null}
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
