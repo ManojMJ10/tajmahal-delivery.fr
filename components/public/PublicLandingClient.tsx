@@ -18,7 +18,7 @@ export default function PublicLandingClient() {
   const t = translations[language];
 
   return (
-    <div className="min-h-screen bg-[#f7f1e8] text-stone-900">
+    <div className="landing-ornament-shell min-h-screen bg-[#f7f1e8] text-stone-900">
       <PublicHeader
         settings={settings}
         language={language}
@@ -27,34 +27,35 @@ export default function PublicLandingClient() {
         onBack={() => {}}
         t={t}
       />
-      <main className="mx-auto max-w-7xl px-4 pt-8 pb-0">
-        <section className="animate-soft-rise relative overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
-          <div className="grid items-center gap-4 px-6 py-8 md:grid-cols-[minmax(0,1fr)_500px] md:px-10 md:py-10">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pt-8 pb-12">
+        <section className="animate-soft-rise landing-hero-sheen relative overflow-hidden rounded-[2.3rem] border border-[var(--page-line)] shadow-[0_24px_60px_rgba(86,56,31,0.08)]">
+          <div className="grid items-center gap-6 px-6 py-7 md:grid-cols-[minmax(0,1fr)_560px] md:px-10 md:py-10">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.heroLabel}</p>
-              <h2 className="mt-3 max-w-md text-3xl font-black leading-[1.05] text-stone-950 md:text-4xl">
+              <p className="text-sm font-bold uppercase tracking-[0.38em] text-stone-500">{t.heroLabel}</p>
+              <h2 className="font-display mt-3 max-w-xl text-[3.6rem] font-semibold leading-[0.92] text-stone-950 md:text-[5.25rem]">
                 {settings.publicSite.heroTitle[language]}
               </h2>
-              <p className="mt-4 max-w-sm text-base leading-6 text-stone-600">
+              <p className="mt-4 max-w-xl text-lg leading-8 text-stone-600 md:text-[1.15rem]">
                 {settings.publicSite.heroSubtitle[language]}
               </p>
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-600">
-                <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.openingHours}</span>
-                <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
-                <span className="rounded-full bg-stone-100 px-4 py-2">{settings.publicSite.phoneNumber}</span>
+              <div className="mt-7 flex flex-wrap gap-3 text-sm text-stone-600 md:text-base">
+                <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.openingHours}</span>
+                <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
+                <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.phoneNumber}</span>
               </div>
             </div>
-            <div className="mx-auto overflow-hidden rounded-[1.75rem] border border-stone-200 bg-stone-100 shadow-md">
+            <div className="relative mx-auto overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-[0_18px_40px_rgba(40,25,12,0.16)]">
               <img
                 src="/restaurant/Taj_Mahal-16-1920w.png"
-                alt="Taj Mahal restaurant exterior and terrace"
+                alt="Taj Mahal Marina restaurant exterior and terrace"
                 className="aspect-[16/10] h-full w-full object-cover"
               />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(34,20,10,0.42)] to-transparent" />
             </div>
           </div>
         </section>
 
-        <section className="mt-6 grid gap-5 lg:grid-cols-3">
+        <section className="mt-5 grid gap-5 lg:grid-cols-3">
           {[
             {
               href: "/order/dine-in",
@@ -81,25 +82,62 @@ export default function PublicLandingClient() {
             <Link
               key={title}
               href={href}
-              className={`animate-soft-rise rounded-[2rem] border p-6 text-left shadow-sm transition-transform duration-150 hover:-translate-y-0.5 ${
+              className={`animate-soft-rise rounded-[2rem] border p-7 text-left shadow-[0_16px_36px_rgba(86,56,31,0.07)] transition-transform duration-150 hover:-translate-y-0.5 ${
                 dark
                   ? "border-stone-900 bg-stone-900 text-white"
-                  : "border-stone-200 bg-white text-stone-900"
+                  : "border-stone-200 bg-white/90 text-stone-900"
               }`}
             >
               <span
-                className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
                   dark ? "bg-white/10 text-white" : "bg-stone-100 text-stone-700"
                 }`}
               >
-                <Icon className="h-6 w-6" />
+                <Icon className="h-7 w-7" />
               </span>
-              <h3 className="mt-6 text-2xl font-black">{title}</h3>
-              <p className={`mt-3 text-lg leading-8 ${dark ? "text-stone-200" : "text-stone-600"}`}>
+              <h3 className="font-display mt-6 text-[2.15rem] font-semibold leading-none">{title}</h3>
+              <p className={`mt-4 text-lg leading-8 ${dark ? "text-stone-200" : "text-stone-600"}`}>
                 {description}
               </p>
             </Link>
           ))}
+        </section>
+
+        <section className="mt-5 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-[2rem] border border-stone-200 bg-white/90 p-6 shadow-[0_16px_36px_rgba(86,56,31,0.06)]">
+            <div className="flex items-center gap-5">
+              <img
+                src="/ornaments/marina-elephants.svg"
+                alt="Ornement inspiré de l'art indien"
+                className="h-24 w-24 shrink-0 rounded-[1.5rem] bg-[#f7f1e8] p-3"
+              />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.34em] text-stone-500">
+                  {language === "fr" ? "Esprit de la maison" : "House character"}
+                </p>
+                <h3 className="font-display mt-2 text-[2.15rem] font-semibold text-stone-950">
+                  {language === "fr" ? "Une adresse de marina, une table de tradition" : "A marina address with timeless tradition"}
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-[2rem] border border-stone-200 bg-white/90 p-6 shadow-[0_16px_36px_rgba(86,56,31,0.06)]">
+            <div className="flex items-center gap-5">
+              <img
+                src="/ornaments/marina-floral-burst.svg"
+                alt="Motif floral ornemental"
+                className="h-24 w-24 shrink-0 rounded-[1.5rem] bg-[#f7f1e8] p-2"
+              />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.34em] text-stone-500">
+                  {language === "fr" ? "Ambiance" : "Atmosphere"}
+                </p>
+                <h3 className="font-display mt-2 text-[2rem] font-semibold text-stone-950">
+                  {language === "fr" ? "Couleurs chaudes, détails raffinés" : "Warm tones with refined detail"}
+                </h3>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>

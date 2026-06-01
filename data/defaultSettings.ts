@@ -1,7 +1,7 @@
 import type { AppSettings } from "@/lib/types";
 
 export const defaultSettings: AppSettings = {
-  "restaurantName": "Taj Mahal",
+  "restaurantName": "Taj Mahal Marina",
   "cuisineLabel": "Restaurant indien et pakistanais",
   "location": "Villeneuve-Loubet, France",
   "categories": [
@@ -119,16 +119,16 @@ export const defaultSettings: AppSettings = {
     "takeawayMessage": "Retrait rapide avec emballage chaud et soigné.",
     "dineInMessage": "Salle confortable pour le déjeuner et le service du soir.",
     "heroTitle": {
-      "en": "Authentic Indian & Pakistani Menu",
-      "fr": "Menu indien et pakistanais authentique"
+      "en": "Taj Mahal Marina",
+      "fr": "Taj Mahal Marina"
     },
     "heroSubtitle": {
-      "en": "Official restaurant menu from Taj Mahal in Nice.",
-      "fr": "La carte officielle du restaurant Taj Mahal Marina, près de Nice."
+      "en": "Indian and Pakistani cuisine by the marina, served with warmth, elegance, and tradition.",
+      "fr": "Cuisine indienne et pakistanaise au bord de la marina, servie avec élégance, chaleur et tradition."
     }
   },
   "kiosk": {
-    "heading": "Taj Mahal",
+    "heading": "Taj Mahal Marina",
     "subtitle": "Restaurant indien et pakistanais",
     "rotationSpeedMs": 6000,
     "categoryRotationSpeedMs": 10000,

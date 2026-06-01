@@ -17,9 +17,9 @@ const SET_MENU_CATEGORY_IDS = new Set(["tasting-menu", "lunch-menu", "children-m
 export const translations = {
   en: {
     openToday: "Open today",
-    heroLabel: "Authentic Indian Menu",
+    heroLabel: "Marina Signature",
     startOrder: "Start Order",
-    ourDishes: "Our Dishes",
+    ourDishes: "Discover the Menu",
     showing: "Showing",
     items: "items",
     search: "Search dishes...",
@@ -85,9 +85,9 @@ export const translations = {
   },
   fr: {
     openToday: "Ouvert aujourd'hui",
-    heroLabel: "Cuisine indienne authentique",
+    heroLabel: "Signature Marina",
     startOrder: "Commander",
-    ourDishes: "Nos plats",
+    ourDishes: "Découvrir la carte",
     showing: "Affichage de",
     items: "plats",
     search: "Rechercher un plat...",
