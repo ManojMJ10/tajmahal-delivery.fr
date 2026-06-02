@@ -31,6 +31,13 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
 
   useEffect(() => {
     initializeStore();
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
   }, []);
 
   const t = translations[language];
