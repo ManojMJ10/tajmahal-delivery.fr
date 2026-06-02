@@ -411,19 +411,6 @@ export function PublicOrderPage({
   const emailLabel = isDineIn ? t.emailForReservation : t.emailForReceipt;
   const emailHelp = isDineIn ? t.reservationHelp : t.receiptHelp;
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
-  const optionQuestion =
-    orderType === "dine_in"
-      ? t.dineInQuestion
-      : orderType === "takeaway"
-        ? t.takeawayQuestion
-        : t.deliveryQuestion;
-  const optionIntro =
-    orderType === "dine_in"
-      ? t.dineInIntro
-      : orderType === "takeaway"
-        ? t.takeawayIntro
-        : t.deliveryIntro;
-
   const canSubmit = isDineIn ? true : cartItems.length > 0;
   const needsMenuSelection = !isDineIn && cartItems.length === 0;
 
@@ -529,11 +516,6 @@ export function PublicOrderPage({
             alt="Indian and Pakistani food table"
             className="h-56 w-full object-cover"
           />
-        </div>
-        <div className="animate-soft-rise mt-10 text-center" style={{ animationDelay: "60ms" }}>
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.order}</p>
-          <h1 className="mt-3 text-4xl font-black text-stone-950 md:text-5xl">{optionQuestion}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-stone-600">{optionIntro}</p>
         </div>
         <section className="animate-soft-rise mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8" style={{ animationDelay: "110ms" }}>
           <h2 className="text-2xl font-black text-stone-950">{selectedOption}</h2>
