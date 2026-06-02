@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUp, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializeStore, saveLanguage, useLanguage, useMenuItems, useSettings } from "@/lib/menuStore";
 import { getDishDescription, getDishName, translations } from "@/lib/publicContent";
@@ -24,10 +24,6 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const dishesSectionRef = useRef<HTMLDivElement | null>(null);
-  const categoryTabsRef = useRef<HTMLDivElement | null>(null);
-  const didMountCategoryRef = useRef(false);
-  const [showCompactCategory, setShowCompactCategory] = useState(false);
 
   useEffect(() => {
     initializeStore();
@@ -97,44 +93,8 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
   };
 
   useEffect(() => {
-    if (!didMountCategoryRef.current) {
-      didMountCategoryRef.current = true;
-      return;
-    }
-
-    dishesSectionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    if (selectedCategory === "all") {
-      setShowCompactCategory(false);
-      return;
-    }
-
-    const node = categoryTabsRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowCompactCategory(!entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-        rootMargin: "-72px 0px 0px 0px",
-      }
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [selectedCategory]);
-
-  useEffect(() => {
     const onScroll = () => {
-      setShowBackToTop(window.scrollY > 560);
+      setShowBackToTop(window.scrollY > 720);
     };
 
     onScroll();
@@ -156,27 +116,14 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
         onCartClick={() => router.push(`/order/${orderType === "home_delivery" ? "home-delivery" : "takeaway"}`)}
         t={t}
       />
-      {showCompactCategory ? (
-        <PublicCategoryTabs
-          settings={settings}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          language={language}
-          compact
-          selectedOnly
-          sticky
-        />
-      ) : null}
-      <div ref={categoryTabsRef}>
-        <PublicCategoryTabs
-          settings={settings}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          language={language}
-        />
-      </div>
+      <PublicCategoryTabs
+        settings={settings}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        language={language}
+      />
       <main className="relative z-10 mx-auto max-w-7xl px-4 pt-24 pb-10">
-        <div className="animate-soft-rise rounded-[2rem] border border-stone-200 bg-white px-6 py-6 shadow-sm md:px-8">
+        <div className="rounded-[2rem] border border-stone-200 bg-white px-6 py-6 shadow-sm md:px-8">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{t.order}</p>
           <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -188,18 +135,14 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
             <button
               type="button"
               onClick={() => router.push(`/order/${orderType === "home_delivery" ? "home-delivery" : "takeaway"}`)}
-              className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-stone-800"
+              className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold text-white"
             >
               {t.cart}
             </button>
           </div>
         </div>
 
-        <div
-          ref={dishesSectionRef}
-          className="animate-soft-rise mt-8 flex flex-col justify-between gap-4 md:flex-row md:items-center scroll-mt-28"
-          style={{ animationDelay: "70ms" }}
-        >
+        <div className="mt-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <p className="text-lg font-semibold text-stone-600">
               {t.showing} {filteredItems.length} {t.items}
@@ -217,7 +160,7 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
         </div>
 
         <section className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredItems.map((item, index) => (
+          {filteredItems.map((item) => (
             <PublicMenuCard
               key={item.id}
               item={item}
@@ -228,7 +171,6 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
               onIncrease={() => increaseCart(item.id)}
               onDecrease={() => decreaseCart(item.id)}
               onNoteChange={(note) => updateNote(item.id, note)}
-              revealDelay={index * 35}
               t={t}
             />
           ))}
@@ -237,8 +179,8 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
       {showBackToTop ? (
         <button
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-stone-900 bg-stone-900 text-white shadow-[0_12px_28px_rgba(38,29,23,0.28)] transition-colors duration-150 hover:bg-stone-800"
+          onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-stone-900 bg-stone-900 text-white shadow-[0_12px_28px_rgba(38,29,23,0.28)]"
           aria-label={language === "fr" ? "Retour en haut" : "Back to top"}
         >
           <ArrowUp className="h-5 w-5" />

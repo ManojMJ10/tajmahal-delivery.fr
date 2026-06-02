@@ -19,7 +19,6 @@ interface PublicMenuCardProps {
   language: Language;
   quantity: number;
   note: string;
-  revealDelay?: number;
   t: {
     addToCart: string;
     addNote: string;
@@ -37,7 +36,6 @@ export function PublicMenuCard({
   language,
   quantity,
   note,
-  revealDelay = 0,
   t,
   onIncrease,
   onDecrease,
@@ -49,11 +47,10 @@ export function PublicMenuCard({
 
   return (
     <div
-      className="card-subtle-motion animate-soft-rise overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm hover:border-stone-300 hover:shadow-md"
-      style={{ animationDelay: `${revealDelay}ms` }}
+      className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm"
     >
       <div className="relative h-44 overflow-hidden bg-stone-100">
-        <img src={item.image} alt={getDishName(item, language)} className="h-full w-full object-cover" />
+        <img src={item.image} alt={getDishName(item, language)} className="h-full w-full object-cover" loading="lazy" />
         <div className="absolute right-3 top-3 rounded-full bg-white/95 p-2 shadow-sm">
           <ShoppingCart className="h-5 w-5 text-stone-800" />
         </div>
@@ -95,7 +92,7 @@ export function PublicMenuCard({
             <button
               type="button"
               onClick={onIncrease}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-stone-900 px-4 py-3 text-sm font-bold text-white transition-colors duration-150 hover:bg-stone-800"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-stone-900 px-4 py-3 text-sm font-bold text-white hover:bg-stone-800"
             >
               <ShoppingCart className="h-4 w-4" /> {t.addToCart}
             </button>
@@ -104,7 +101,7 @@ export function PublicMenuCard({
               <button
                 type="button"
                 onClick={onDecrease}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 bg-white hover:bg-stone-100"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 bg-white"
               >
                 <Minus className="h-4 w-4" />
               </button>
@@ -112,7 +109,7 @@ export function PublicMenuCard({
               <button
                 type="button"
                 onClick={onIncrease}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-900 text-white hover:bg-stone-800"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-900 text-white"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -123,7 +120,7 @@ export function PublicMenuCard({
           <button
             type="button"
             onClick={() => setShowNote((value) => !value)}
-            className="flex w-full items-center justify-center rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-bold text-stone-800 transition-colors duration-150 hover:bg-stone-50"
+            className="flex w-full items-center justify-center rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-bold text-stone-800"
           >
             {note ? t.editNote : t.addNote}
           </button>
