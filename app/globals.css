@@ -122,11 +122,13 @@ select {
 .public-page-shell::before {
   background:
     url("/ornaments/marina-border.svg") repeat-x center 76px / 860px 86px,
+    url("/ornaments/marina-floral-burst.svg") no-repeat left 24px top 118px / 170px auto,
+    url("/ornaments/external/flower-sketch19.svg") no-repeat right 30px top 122px / 170px auto,
     url("/ornaments/external/flower-ornament-red.svg") repeat-y left -10px top 150px / 112px auto,
     url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -16px top 140px / 112px auto,
     url("/ornaments/external/flower-sketch19.svg") no-repeat left 24px bottom 42px / 230px auto,
     url("/ornaments/marina-floral-burst.svg") no-repeat right 36px bottom 52px / 240px auto;
-  opacity: 0.18;
+  opacity: 0.24;
 }
 
 .public-page-shell::after {
@@ -152,11 +154,13 @@ select {
   .public-page-shell::before {
     background:
       url("/ornaments/marina-border.svg") repeat-x center 76px / 760px 74px,
+      url("/ornaments/marina-floral-burst.svg") no-repeat left -22px top 124px / 142px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat right -22px top 126px / 142px auto,
       url("/ornaments/external/flower-ornament-red.svg") repeat-y left -30px top 150px / 92px auto,
       url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -34px top 150px / 92px auto,
       url("/ornaments/external/flower-sketch19.svg") no-repeat left -80px bottom 24px / 180px auto,
       url("/ornaments/marina-floral-burst.svg") no-repeat right -76px bottom 40px / 180px auto;
-    opacity: 0.16;
+    opacity: 0.2;
   }
 }
 
@@ -164,9 +168,13 @@ select {
   .public-page-shell::before {
     background:
       url("/ornaments/marina-border.svg") repeat-x center 76px / 560px 48px,
+      url("/ornaments/marina-floral-burst.svg") no-repeat left -28px top 118px / 108px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat right -30px top 120px / 108px auto,
       url("/ornaments/external/flower-ornament-red.svg") repeat-y left -34px top 132px / 72px auto,
-      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -42px top 132px / 70px auto;
-    opacity: 0.1;
+      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -42px top 132px / 70px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat left -52px bottom 12px / 124px auto,
+      url("/ornaments/marina-floral-burst.svg") no-repeat right -52px bottom 16px / 124px auto;
+    opacity: 0.14;
   }
 }
 
@@ -174,8 +182,12 @@ select {
   .public-page-shell::before {
     background:
       url("/ornaments/marina-border.svg") repeat-x center 84px / 480px 42px,
+      url("/ornaments/marina-floral-burst.svg") no-repeat left -30px top 120px / 88px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat right -34px top 122px / 88px auto,
       url("/ornaments/external/flower-ornament-red.svg") repeat-y left -44px top 126px / 62px auto,
-      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -48px top 126px / 60px auto;
-    opacity: 0.08;
+      url("/ornaments/external/abstract-floral-1913.svg") repeat-y right -48px top 126px / 60px auto,
+      url("/ornaments/external/flower-sketch19.svg") no-repeat left -58px bottom 8px / 104px auto,
+      url("/ornaments/marina-floral-burst.svg") no-repeat right -58px bottom 10px / 104px auto;
+    opacity: 0.12;
   }
 }
