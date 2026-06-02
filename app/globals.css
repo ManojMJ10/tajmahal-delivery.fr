@@ -54,8 +54,8 @@ h6,
 
 @keyframes soft-rise {
   from {
-    opacity: 0.98;
-    transform: translateY(4px);
+    opacity: 0.995;
+    transform: translateY(1px);
   }
   to {
     opacity: 1;
@@ -64,15 +64,15 @@ h6,
 }
 
 .animate-soft-rise {
-  animation: soft-rise 140ms ease-out both;
+  animation: soft-rise 70ms linear both;
 }
 
 .card-subtle-motion {
   transition:
-    box-shadow 100ms ease,
-    border-color 100ms ease,
-    background-color 100ms ease,
-    color 100ms ease;
+    box-shadow 60ms linear,
+    border-color 60ms linear,
+    background-color 60ms linear,
+    color 60ms linear;
 }
 
 .card-subtle-motion:hover {
@@ -80,8 +80,8 @@ h6,
 }
 
 .public-page-shell * {
-  animation-duration: 140ms !important;
-  transition-duration: 100ms !important;
+  animation-duration: 70ms !important;
+  transition-duration: 60ms !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
