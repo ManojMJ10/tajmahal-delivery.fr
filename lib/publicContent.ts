@@ -29,15 +29,15 @@ export const translations = {
     orderQuestion: "How would you like to order?",
     orderIntro:
       "Choose dine in, takeaway, or home delivery, then receive a polished confirmation email with your full order details.",
-    dineInQuestion: "Book your table with ease",
+    dineInQuestion: "Reserve your dine-in experience",
     dineInIntro:
-      "Share your details to reserve a comfortable table and receive a clear confirmation for your visit at Taj Mahal Marina.",
-    takeawayQuestion: "Prepare your takeaway order",
+      "Share your details to reserve your table at Taj Mahal Marina and receive a clear confirmation for your visit.",
+    takeawayQuestion: "Confirm your takeaway pickup",
     takeawayIntro:
-      "Confirm your collection details and receive a polished summary of the dishes prepared for pickup.",
-    deliveryQuestion: "Arrange your home delivery",
+      "Enter your collection details and receive a complete confirmation for the dishes prepared to take away.",
+    deliveryQuestion: "Schedule your home delivery",
     deliveryIntro:
-      "Enter your delivery details to receive a complete confirmation for a fresh order sent to your address.",
+      "Enter your delivery details and receive a complete confirmation for a fresh order sent directly to your address.",
     dineIn: "Dine In",
     takeAway: "Take Away",
     homeDelivery: "Home Delivery",
@@ -106,15 +106,15 @@ export const translations = {
     orderQuestion: "Comment souhaitez-vous commander ?",
     orderIntro:
       "Choisissez sur place, à emporter ou en livraison à domicile, puis recevez un e-mail de confirmation complet et soigné.",
-    dineInQuestion: "Réservez votre table en toute simplicité",
+    dineInQuestion: "Réservez votre expérience sur place",
     dineInIntro:
-      "Renseignez vos informations pour réserver une table confortable et recevoir une confirmation claire pour votre venue au Taj Mahal Marina.",
-    takeawayQuestion: "Préparez votre commande à emporter",
+      "Renseignez vos informations pour réserver votre table au Taj Mahal Marina et recevoir une confirmation claire pour votre venue.",
+    takeawayQuestion: "Confirmez votre retrait à emporter",
     takeawayIntro:
-      "Confirmez vos informations de retrait et recevez un récapitulatif soigné des plats préparés pour l'emporter.",
-    deliveryQuestion: "Organisez votre livraison à domicile",
+      "Indiquez vos informations de retrait et recevez une confirmation complète des plats préparés à emporter.",
+    deliveryQuestion: "Programmez votre livraison à domicile",
     deliveryIntro:
-      "Saisissez vos coordonnées de livraison pour recevoir une confirmation complète d'une commande fraîche envoyée à votre adresse.",
+      "Saisissez vos coordonnées de livraison et recevez une confirmation complète d'une commande fraîche envoyée directement à votre adresse.",
     dineIn: "Sur place",
     takeAway: "À emporter",
     homeDelivery: "Livraison à domicile",
