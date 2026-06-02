@@ -29,6 +29,15 @@ export const translations = {
     orderQuestion: "How would you like to order?",
     orderIntro:
       "Choose dine in, takeaway, or home delivery, then receive a polished confirmation email with your full order details.",
+    dineInQuestion: "Book your table with ease",
+    dineInIntro:
+      "Share your details to reserve a comfortable table and receive a clear confirmation for your visit at Taj Mahal Marina.",
+    takeawayQuestion: "Prepare your takeaway order",
+    takeawayIntro:
+      "Confirm your collection details and receive a polished summary of the dishes prepared for pickup.",
+    deliveryQuestion: "Arrange your home delivery",
+    deliveryIntro:
+      "Enter your delivery details to receive a complete confirmation for a fresh order sent to your address.",
     dineIn: "Dine In",
     takeAway: "Take Away",
     homeDelivery: "Home Delivery",
@@ -97,6 +106,15 @@ export const translations = {
     orderQuestion: "Comment souhaitez-vous commander ?",
     orderIntro:
       "Choisissez sur place, à emporter ou en livraison à domicile, puis recevez un e-mail de confirmation complet et soigné.",
+    dineInQuestion: "Réservez votre table en toute simplicité",
+    dineInIntro:
+      "Renseignez vos informations pour réserver une table confortable et recevoir une confirmation claire pour votre venue au Taj Mahal Marina.",
+    takeawayQuestion: "Préparez votre commande à emporter",
+    takeawayIntro:
+      "Confirmez vos informations de retrait et recevez un récapitulatif soigné des plats préparés pour l'emporter.",
+    deliveryQuestion: "Organisez votre livraison à domicile",
+    deliveryIntro:
+      "Saisissez vos coordonnées de livraison pour recevoir une confirmation complète d'une commande fraîche envoyée à votre adresse.",
     dineIn: "Sur place",
     takeAway: "À emporter",
     homeDelivery: "Livraison à domicile",
