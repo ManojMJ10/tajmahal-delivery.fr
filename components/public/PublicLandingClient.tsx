@@ -43,6 +43,14 @@ export default function PublicLandingClient() {
                 <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.restaurantAddress}</span>
                 <span className="rounded-full border border-stone-200 bg-white/80 px-4 py-2">{settings.publicSite.phoneNumber}</span>
               </div>
+              <div className="mt-5">
+                <Link
+                  href="/menu/takeaway"
+                  className="inline-flex items-center rounded-full border border-stone-900 bg-stone-900 px-5 py-3 text-sm font-bold text-white transition-colors duration-150 hover:bg-stone-800"
+                >
+                  {language === "fr" ? "Voir le menu" : "See Menu"}
+                </Link>
+              </div>
             </div>
             <div className="relative mx-auto overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-[0_18px_40px_rgba(40,25,12,0.16)]">
               <img

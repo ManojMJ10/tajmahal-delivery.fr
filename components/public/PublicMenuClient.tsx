@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { ArrowUp, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializeStore, saveLanguage, useLanguage, useMenuItems, useSettings } from "@/lib/menuStore";
@@ -23,6 +23,7 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
   const { cart, notes } = usePublicCartState();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [search, setSearch] = useState("");
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const dishesSectionRef = useRef<HTMLDivElement | null>(null);
   const categoryTabsRef = useRef<HTMLDivElement | null>(null);
   const didMountCategoryRef = useRef(false);
@@ -124,6 +125,16 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
     return () => observer.disconnect();
   }, [selectedCategory]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 560);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const orderTypeLabel =
     orderType === "takeaway" ? t.takeAway : orderType === "home_delivery" ? t.homeDelivery : t.dineIn;
 
@@ -216,6 +227,16 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
           ))}
         </section>
       </main>
+      {showBackToTop ? (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-stone-900 bg-stone-900 text-white shadow-[0_12px_28px_rgba(38,29,23,0.28)] transition-colors duration-150 hover:bg-stone-800"
+          aria-label={language === "fr" ? "Retour en haut" : "Back to top"}
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
+      ) : null}
     </div>
   );
 }
