@@ -55,6 +55,7 @@ export function buildOrderConfirmationEmail({
   settings,
   payload,
   menuItems,
+  orderRef,
   subject,
   intro,
   heading,
@@ -62,6 +63,7 @@ export function buildOrderConfirmationEmail({
   settings: AppSettings;
   payload: OrderConfirmationPayload;
   menuItems: MenuItem[];
+  orderRef?: string;
   subject?: string;
   intro?: string;
   heading?: string;
@@ -71,7 +73,7 @@ export function buildOrderConfirmationEmail({
   const orderLabel = getOrderTypeLabel(payload.orderType, language);
   const itemRows = getItemRows(payload, menuItems, language);
   const total = formatEuro(getTotal(itemRows));
-  const orderRef = `TM-${Date.now().toString().slice(-8)}`;
+  const resolvedOrderRef = orderRef || `TM-${Date.now().toString().slice(-8)}`;
   const introText =
     intro ||
     (language === "fr"
@@ -130,8 +132,8 @@ export function buildOrderConfirmationEmail({
   const emailSubject =
     subject ||
     (language === "fr"
-      ? `Confirmation Taj Mahal ${orderRef}`
-      : `Taj Mahal confirmation ${orderRef}`);
+      ? `Confirmation Taj Mahal ${resolvedOrderRef}`
+      : `Taj Mahal confirmation ${resolvedOrderRef}`);
 
   const html = `
     <div style="margin:0;padding:32px 16px;background:#f5f5f4;font-family:Georgia, 'Times New Roman', serif;">
@@ -149,7 +151,7 @@ export function buildOrderConfirmationEmail({
         <div style="padding:32px 36px;">
           <div style="padding:20px 24px;border:1px solid #e7e5e4;border-radius:22px;background:#fafaf9;">
             <div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#78716c;font-weight:800;">${language === "fr" ? "Reference" : "Reference"}</div>
-            <div style="margin-top:8px;font-size:22px;font-weight:800;color:#111827;">${escapeHtml(orderRef)}</div>
+            <div style="margin-top:8px;font-size:22px;font-weight:800;color:#111827;">${escapeHtml(resolvedOrderRef)}</div>
           </div>
 
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:24px;">
@@ -189,7 +191,7 @@ export function buildOrderConfirmationEmail({
 
   const textLines = [
     `Taj Mahal - ${orderLabel}`,
-    orderRef,
+    resolvedOrderRef,
     "",
     introText,
     "",

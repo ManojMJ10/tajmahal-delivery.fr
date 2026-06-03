@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { defaultMenu } from "@/data/defaultMenu";
 import { defaultSettings } from "@/data/defaultSettings";
 import { buildOrderConfirmationEmail } from "@/lib/orderEmail";
+import { sendN8nOrderWebhook } from "@/lib/orderWebhook";
 import { translations } from "@/lib/publicContent";
 import type { OrderConfirmationPayload } from "@/lib/types";
 
@@ -34,7 +35,10 @@ function getEnv() {
     return null;
   }
 
-  return { apiKey, from, ownerEmail };
+  const n8nWebhookUrl = process.env.N8N_ORDER_WEBHOOK_URL;
+  const n8nWebhookSecret = process.env.N8N_WEBHOOK_SECRET;
+
+  return { apiKey, from, ownerEmail, n8nWebhookUrl, n8nWebhookSecret };
 }
 
 export async function POST(request: Request) {
@@ -61,10 +65,12 @@ export async function POST(request: Request) {
     }
 
     const resend = new Resend(env.apiKey);
+    const orderRef = `TM-${Date.now().toString().slice(-8)}`;
     const customerEmail = buildOrderConfirmationEmail({
       settings: defaultSettings,
       payload,
       menuItems: defaultMenu,
+      orderRef,
     });
     const language = payload.language;
     const t = translations[language];
@@ -72,6 +78,7 @@ export async function POST(request: Request) {
       settings: defaultSettings,
       payload,
       menuItems: defaultMenu,
+      orderRef,
       subject:
         language === "fr"
           ? `Nouvelle commande ${payload.customerName}`
@@ -108,6 +115,19 @@ export async function POST(request: Request) {
     if (customerResult.error || ownerResult.error) {
       const message = customerResult.error?.message || ownerResult.error?.message || "Email sending failed.";
       return NextResponse.json({ error: message }, { status: 500 });
+    }
+
+    try {
+      await sendN8nOrderWebhook({
+        url: env.n8nWebhookUrl,
+        secret: env.n8nWebhookSecret,
+        settings: defaultSettings,
+        payload,
+        menuItems: defaultMenu,
+        orderRef,
+      });
+    } catch (webhookError) {
+      console.error("n8n order webhook failed", webhookError);
     }
 
     return NextResponse.json({
