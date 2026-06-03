@@ -14,8 +14,13 @@ const bodyFont = Manrope({
 });
 
 export const metadata = {
-  title: "Taj Mahal Menu",
-  description: "Indian and Pakistani restaurant menu, ordering, and booking prototype for Nice, France.",
+  title: "Taj Mahal Marina",
+  description: "Indian and Pakistani restaurant menu, ordering, and booking experience for Taj Mahal Marina in Villeneuve-Loubet, France.",
+  icons: {
+    icon: "/icon.jpg",
+    shortcut: "/icon.jpg",
+    apple: "/icon.jpg",
+  },
 };
 
 export default function RootLayout({ children }) {
