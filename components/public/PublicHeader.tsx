@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Clock, Languages, MapPin, Phone, ShoppingCart } from "lucide-react";
 import type { AppSettings, Language } from "@/lib/types";
 
@@ -41,14 +40,9 @@ export function PublicHeader({
     <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-start justify-between gap-4 px-4 py-4 md:items-center">
         <button type="button" onClick={onBack} className="text-left">
-          <Image
-            src="/branding/taj-mahal-logo.jpg"
-            alt={`${settings.restaurantName} logo`}
-            width={460}
-            height={178}
-            className="h-auto w-[220px] object-contain md:w-[320px] xl:w-[360px]"
-            priority
-          />
+          <h1 className="font-display text-[2.35rem] font-semibold leading-none tracking-[-0.05em] text-stone-950 md:text-[3.15rem]">
+            {settings.restaurantName}
+          </h1>
           <div className="mt-1 space-y-1 text-xs text-stone-500 md:text-sm">
             <p className="flex items-center gap-1">
               <MapPin className="h-3 w-3" /> {settings.location}
