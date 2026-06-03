@@ -413,6 +413,18 @@ export function PublicOrderPage({
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
   const canSubmit = isDineIn ? true : cartItems.length > 0;
   const needsMenuSelection = !isDineIn && cartItems.length === 0;
+  const submitSuccessMessage =
+    language === "fr"
+      ? orderType === "dine_in"
+        ? "✅ Votre réservation sur place a bien été envoyée. Un e-mail de confirmation a été transmis au client et au restaurant."
+        : orderType === "takeaway"
+          ? "✅ Votre commande à emporter a bien été envoyée. Un e-mail de confirmation a été transmis au client et au restaurant."
+          : "✅ Votre commande en livraison a bien été envoyée. Un e-mail de confirmation a été transmis au client et au restaurant."
+      : orderType === "dine_in"
+        ? "✅ Your dine-in reservation has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
+        : orderType === "takeaway"
+          ? "✅ Your takeaway order has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
+          : "✅ Your delivery order has been sent successfully. Confirmation emails were sent to the customer and the restaurant.";
 
   async function submitOrder() {
     setSubmitError("");
@@ -473,11 +485,7 @@ export function PublicOrderPage({
         throw new Error(result.error || "Unable to send confirmation.");
       }
 
-      setSubmitSuccess(
-        language === "fr"
-          ? "Votre commande a ete envoyee. Un e-mail de confirmation a ete transmis au client et au restaurant."
-          : "Your order has been placed. Confirmation emails were sent to the customer and the restaurant."
-      );
+      setSubmitSuccess(submitSuccessMessage);
       onSubmitSuccess?.();
     } catch (error) {
       setSubmitError(
@@ -521,8 +529,8 @@ export function PublicOrderPage({
           <h2 className="text-2xl font-black text-stone-950">{selectedOption}</h2>
           <p className="mt-2 text-stone-600">{t.customerDetails}</p>
           {submitSuccess ? (
-            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
-              {submitSuccess}
+            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900">
+              <p className="font-bold">{submitSuccess}</p>
             </div>
           ) : null}
           {submitError ? (
