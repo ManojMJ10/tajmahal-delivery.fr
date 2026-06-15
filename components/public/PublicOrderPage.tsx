@@ -410,6 +410,7 @@ export function PublicOrderPage({
     orderType === "dine_in" ? t.dineIn : orderType === "takeaway" ? t.takeAway : t.homeDelivery;
   const emailLabel = isDineIn ? t.emailForReservation : t.emailForReceipt;
   const emailHelp = isDineIn ? t.reservationHelp : t.receiptHelp;
+  const submitLabel = isDineIn ? t.sendReservationConfirmation : t.sendConfirmation;
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
   const canSubmit = isDineIn ? true : cartItems.length > 0;
   const needsMenuSelection = !isDineIn && cartItems.length === 0;
@@ -645,7 +646,7 @@ export function PublicOrderPage({
             disabled={isSubmitting || needsMenuSelection}
             className="mt-6 rounded-full bg-stone-900 px-8 py-3 font-bold text-white transition-colors duration-150 hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >
-            {isSubmitting ? t.sending : t.sendConfirmation}
+            {isSubmitting ? t.sending : submitLabel}
           </button>
         </section>
       </main>
