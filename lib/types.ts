@@ -86,6 +86,8 @@ export interface OrderConfirmationPayload {
   email: string;
   addressLine1: string;
   addressLine2: string;
+  postcode: string;
+  city: string;
   guestCount: number;
   date: string;
   timeSlot: string;

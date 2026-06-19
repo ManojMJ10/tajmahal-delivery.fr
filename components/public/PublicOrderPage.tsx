@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, MapPin, Minus, Plus } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
+import { isSupportedDeliveryAddress } from "@/lib/deliveryZones";
 import { formatEuro, getDishName, getLocalizedCategoryLabel, getSpiceLabel, parsePrice, shouldShowSpiceLevel } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
 import { PublicHeader } from "@/components/public/PublicHeader";
@@ -235,10 +236,12 @@ function TimeSlotSelect({
 }
 
 function AddressSearch({
+  label,
   placeholder,
   value,
   onChange,
 }: {
+  label: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -253,7 +256,7 @@ function AddressSearch({
 
   return (
     <div className="grid gap-5 md:col-span-2">
-      <Field label={placeholder} required>
+      <Field label={label} required>
         <div className="relative">
           <input
             value={value}
@@ -395,6 +398,8 @@ export function PublicOrderPage({
   const [email, setEmail] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [city, setCity] = useState("");
   const [guestCount, setGuestCount] = useState(2);
   const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   const [date, setDate] = useState(
@@ -441,6 +446,19 @@ export function PublicOrderPage({
       return;
     }
 
+    if (orderType === "home_delivery" && (!addressLine2.trim() || !postcode.trim() || !city.trim())) {
+      setSubmitError(language === "fr" ? "Veuillez remplir tous les champs d'adresse obligatoires." : "Please complete all required address fields.");
+      return;
+    }
+
+    if (
+      orderType === "home_delivery" &&
+      !isSupportedDeliveryAddress(addressLine1.trim(), addressLine2.trim())
+    ) {
+      setSubmitError(t.unsupportedDeliveryArea);
+      return;
+    }
+
     if (!canSubmit) {
       setSubmitError(
         language === "fr"
@@ -458,6 +476,8 @@ export function PublicOrderPage({
       email: email.trim(),
       addressLine1: addressLine1.trim(),
       addressLine2: addressLine2.trim(),
+      postcode: postcode.trim(),
+      city: city.trim(),
       guestCount,
       date,
       timeSlot: timeSlot.trim(),
@@ -588,11 +608,12 @@ export function PublicOrderPage({
             {orderType === "home_delivery" ? (
               <>
                 <AddressSearch
+                  label={t.deliveryAddress}
                   placeholder={t.addressLine1Placeholder}
                   value={addressLine1}
                   onChange={setAddressLine1}
                 />
-                <Field label={t.addressLine2}>
+                <Field label={t.addressLine2} required>
                   <input
                     value={addressLine2}
                     onChange={(event) => setAddressLine2(event.target.value)}
@@ -600,6 +621,24 @@ export function PublicOrderPage({
                     placeholder={t.addressLine2Placeholder}
                   />
                 </Field>
+                <div className="grid gap-4 md:col-span-2 md:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
+                  <Field label={t.postcode} required>
+                    <input
+                      value={postcode}
+                      onChange={(event) => setPostcode(event.target.value)}
+                      className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                      placeholder={t.postcodePlaceholder}
+                    />
+                  </Field>
+                  <Field label={t.city} required>
+                    <input
+                      value={city}
+                      onChange={(event) => setCity(event.target.value)}
+                      className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                      placeholder={t.cityPlaceholder}
+                    />
+                  </Field>
+                </div>
               </>
             ) : null}
             {orderType === "dine_in" || orderType === "takeaway" ? (

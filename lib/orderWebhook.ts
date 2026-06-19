@@ -85,6 +85,8 @@ export async function sendN8nOrderWebhook({
       guestCount: payload.guestCount,
       addressLine1: payload.addressLine1,
       addressLine2: payload.addressLine2,
+      postcode: payload.postcode,
+      city: payload.city,
       notes: payload.notes,
     },
     schedule: {

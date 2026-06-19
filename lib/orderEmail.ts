@@ -17,6 +17,16 @@ function getOrderTypeLabel(orderType: OrderType, language: Language) {
   return t.homeDelivery;
 }
 
+function formatDeliveryAddress(payload: OrderConfirmationPayload) {
+  return [
+    payload.addressLine1,
+    payload.addressLine2,
+    [payload.postcode, payload.city].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 function formatDate(date: string, language: Language) {
   if (!date) return language === "fr" ? "Non precisee" : "Not provided";
   const parsed = new Date(`${date}T12:00:00`);
@@ -86,7 +96,7 @@ export function buildOrderConfirmationEmail({
     [t.phoneNumber, payload.phoneNumber],
     [t.emailForUpdates, payload.email],
     payload.orderType === "home_delivery"
-      ? [t.deliveryAddress, [payload.addressLine1, payload.addressLine2].filter(Boolean).join(", ")]
+      ? [t.deliveryAddress, formatDeliveryAddress(payload)]
       : null,
     payload.orderType === "dine_in"
       ? [t.guestsTime, String(payload.guestCount)]
@@ -200,7 +210,7 @@ export function buildOrderConfirmationEmail({
     `${t.phoneNumber}: ${payload.phoneNumber}`,
     `${t.emailForUpdates}: ${payload.email}`,
     payload.orderType === "home_delivery"
-      ? `${t.deliveryAddress}: ${[payload.addressLine1, payload.addressLine2].filter(Boolean).join(", ")}`
+      ? `${t.deliveryAddress}: ${formatDeliveryAddress(payload)}`
       : null,
     payload.orderType === "dine_in" ? `${t.guestsTime}: ${payload.guestCount}` : null,
     `${language === "fr" ? "Date" : "Date"}: ${formatDate(payload.date, language)}`,

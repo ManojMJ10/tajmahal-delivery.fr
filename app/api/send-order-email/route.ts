@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { defaultMenu } from "@/data/defaultMenu";
 import { defaultSettings } from "@/data/defaultSettings";
+import { isSupportedDeliveryAddress } from "@/lib/deliveryZones";
 import { buildOrderConfirmationEmail } from "@/lib/orderEmail";
 import { sendN8nOrderWebhook } from "@/lib/orderWebhook";
 import { translations } from "@/lib/publicContent";
@@ -21,6 +22,9 @@ function isValidPayload(payload: OrderConfirmationPayload) {
     return false;
   }
   if (payload.orderType === "home_delivery" && !payload.addressLine1.trim()) return false;
+  if (payload.orderType === "home_delivery" && !payload.addressLine2.trim()) return false;
+  if (payload.orderType === "home_delivery" && !payload.postcode.trim()) return false;
+  if (payload.orderType === "home_delivery" && !payload.city.trim()) return false;
   if ((payload.orderType === "dine_in" || payload.orderType === "takeaway") && !payload.date.trim()) return false;
   if (payload.orderType === "dine_in" && payload.guestCount < 1) return false;
   return true;
@@ -74,6 +78,14 @@ export async function POST(request: Request) {
     });
     const language = payload.language;
     const t = translations[language];
+
+    if (
+      payload.orderType === "home_delivery" &&
+      !isSupportedDeliveryAddress(payload.addressLine1.trim(), payload.addressLine2?.trim() ?? "")
+    ) {
+      return NextResponse.json({ error: t.unsupportedDeliveryArea }, { status: 400 });
+    }
+
     const ownerEmail = buildOrderConfirmationEmail({
       settings: defaultSettings,
       payload,
