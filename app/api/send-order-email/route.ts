@@ -16,7 +16,7 @@ function isValidPayload(payload: OrderConfirmationPayload) {
   if (!payload.customerName.trim()) return false;
   if (!payload.phoneNumber.trim()) return false;
   if (!isValidEmail(payload.email.trim())) return false;
-  if (!payload.timeSlot.trim()) return false;
+  if ((payload.orderType === "dine_in" || payload.orderType === "takeaway") && !payload.timeSlot.trim()) return false;
   if (!Array.isArray(payload.items)) return false;
   if ((payload.orderType === "takeaway" || payload.orderType === "home_delivery") && payload.items.length === 0) {
     return false;

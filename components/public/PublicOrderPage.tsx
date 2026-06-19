@@ -491,7 +491,12 @@ export function PublicOrderPage({
     setSubmitError("");
     setSubmitSuccess("");
 
-    if (!customerName.trim() || !phoneNumber.trim() || !email.trim() || !timeSlot.trim()) {
+    if (!customerName.trim() || !phoneNumber.trim() || !email.trim()) {
+      setSubmitError(language === "fr" ? "Veuillez remplir tous les champs obligatoires." : "Please complete all required fields.");
+      return;
+    }
+
+    if ((orderType === "dine_in" || orderType === "takeaway") && !timeSlot.trim()) {
       setSubmitError(language === "fr" ? "Veuillez remplir tous les champs obligatoires." : "Please complete all required fields.");
       return;
     }
@@ -719,13 +724,6 @@ export function PublicOrderPage({
                     <Calendar language={language} selectedDate={date} onChange={setDate} />
                   </Field>
                 ) : null}
-                <Field label={t.timeSlot} required>
-                  <TimeSlotSelect language={language} selectedTime={timeSlot} onChange={setTimeSlot} />
-                </Field>
-              </div>
-            ) : null}
-            {orderType === "home_delivery" ? (
-              <div className="md:col-span-2">
                 <Field label={t.timeSlot} required>
                   <TimeSlotSelect language={language} selectedTime={timeSlot} onChange={setTimeSlot} />
                 </Field>
