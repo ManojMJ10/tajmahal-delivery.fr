@@ -247,11 +247,11 @@ function AddressSearch({
   onChange: (value: string) => void;
 }) {
   const suggestions = [
-    "12 Avenue Jean Medecin, Nice, 06000",
-    "24 Rue Massena, Nice, 06000",
-    "7 Rue de France, Nice, 06000",
-    "18 Boulevard Gambetta, Nice, 06000",
-    "5 Promenade des Anglais, Nice, 06000",
+    "1001 Av. Jean Marchand, Villeneuve-Loubet, 06270",
+    "15 Avenue de la Mer, Villeneuve-Loubet, 06270",
+    "8 Allee des Bugadieres, Villeneuve-Loubet, 06270",
+    "22 Route de Grasse, Villeneuve-Loubet, 06270",
+    "4 Avenue des Rives, Villeneuve-Loubet, 06270",
   ].filter((place) => place.toLowerCase().includes(value.toLowerCase()));
 
   return (
