@@ -11,6 +11,13 @@ export const ALLOWED_DELIVERY_CITIES = [
   "Cagnes-sur-Mer",
 ] as const;
 
+export const DELIVERY_CITY_POSTCODES: Record<(typeof ALLOWED_DELIVERY_CITIES)[number], string> = {
+  "Villeneuve-Loubet": "06270",
+  Antibes: "06600",
+  Biot: "06410",
+  "Cagnes-sur-Mer": "06800",
+};
+
 export const DELIVERY_MAX_RADIUS_KM = 15;
 export const DELIVERY_MINIMUM_ORDER_AMOUNT = 50 as const;
 

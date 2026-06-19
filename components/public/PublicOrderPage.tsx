@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, MapPin, Minus, Plus } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
-import { isSupportedDeliveryAddress } from "@/lib/deliveryZones";
+import { ALLOWED_DELIVERY_CITIES, DELIVERY_CITY_POSTCODES, isSupportedDeliveryAddress } from "@/lib/deliveryZones";
 import { formatEuro, getDishName, getLocalizedCategoryLabel, getSpiceLabel, parsePrice, shouldShowSpiceLevel } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
 import { PublicHeader } from "@/components/public/PublicHeader";
@@ -21,6 +21,8 @@ interface OrderPageProps {
   onSubmitSuccess?: () => void;
   t: Record<string, string>;
 }
+
+type DeliveryCity = (typeof ALLOWED_DELIVERY_CITIES)[number];
 
 function getCartItems(menuItems: MenuItem[], cart: Record<string, number>) {
   return menuItems.filter((item) => Number(cart[item.id] || 0) > 0);
@@ -236,11 +238,13 @@ function TimeSlotSelect({
 }
 
 function AddressSearch({
+  selectedCity,
   label,
   placeholder,
   value,
   onChange,
 }: {
+  selectedCity: string;
   label: string;
   placeholder: string;
   value: string;
@@ -252,7 +256,17 @@ function AddressSearch({
     "8 Allee des Bugadieres, Villeneuve-Loubet, 06270",
     "22 Route de Grasse, Villeneuve-Loubet, 06270",
     "4 Avenue des Rives, Villeneuve-Loubet, 06270",
-  ].filter((place) => place.toLowerCase().includes(value.toLowerCase()));
+    "12 Boulevard Albert 1er, Antibes, 06600",
+    "6 Avenue Robert Soleau, Antibes, 06600",
+    "18 Route de Valbonne, Biot, 06410",
+    "4 Chemin des Combes, Biot, 06410",
+    "9 Avenue de Nice, Cagnes-sur-Mer, 06800",
+    "17 Boulevard Marechal Juin, Cagnes-sur-Mer, 06800",
+  ].filter(
+    (place) =>
+      (!selectedCity || place.toLowerCase().includes(selectedCity.toLowerCase())) &&
+      place.toLowerCase().includes(value.toLowerCase())
+  );
 
   return (
     <div className="grid gap-5 md:col-span-2">
@@ -279,6 +293,46 @@ function AddressSearch({
               ))}
             </div>
           ) : null}
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+function DeliveryCityPicker({
+  selectedCity,
+  onSelect,
+  t,
+}: {
+  selectedCity: string;
+  onSelect: (city: DeliveryCity) => void;
+  t: Record<string, string>;
+}) {
+  return (
+    <div className="md:col-span-2">
+      <Field label={t.deliveredCities} help={t.deliveredCitiesHelp} required>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {ALLOWED_DELIVERY_CITIES.map((city) => {
+            const selected = selectedCity === city;
+
+            return (
+              <button
+                key={city}
+                type="button"
+                onClick={() => onSelect(city)}
+                className={`rounded-2xl border px-4 py-4 text-left text-base font-bold transition-colors duration-150 ${
+                  selected
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 bg-white text-stone-800 hover:bg-stone-50"
+                }`}
+              >
+                <span className="block">{city}</span>
+                <span className={`mt-1 block text-sm font-medium ${selected ? "text-stone-200" : "text-stone-500"}`}>
+                  {DELIVERY_CITY_POSTCODES[city]}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </Field>
     </div>
@@ -398,6 +452,7 @@ export function PublicOrderPage({
   const [email, setEmail] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
+  const [selectedDeliveryCity, setSelectedDeliveryCity] = useState("");
   const [postcode, setPostcode] = useState("");
   const [city, setCity] = useState("");
   const [guestCount, setGuestCount] = useState(2);
@@ -443,6 +498,11 @@ export function PublicOrderPage({
 
     if (orderType === "home_delivery" && !addressLine1.trim()) {
       setSubmitError(language === "fr" ? "Veuillez saisir l'adresse de livraison." : "Please enter the delivery address.");
+      return;
+    }
+
+    if (orderType === "home_delivery" && !selectedDeliveryCity.trim()) {
+      setSubmitError(language === "fr" ? "Veuillez choisir une ville livrée." : "Please choose a supported delivery city.");
       return;
     }
 
@@ -607,7 +667,17 @@ export function PublicOrderPage({
             </Field>
             {orderType === "home_delivery" ? (
               <>
+                <DeliveryCityPicker
+                  selectedCity={selectedDeliveryCity}
+                  onSelect={(selectedCity) => {
+                    setSelectedDeliveryCity(selectedCity);
+                    setCity(selectedCity);
+                    setPostcode(DELIVERY_CITY_POSTCODES[selectedCity]);
+                  }}
+                  t={t}
+                />
                 <AddressSearch
+                  selectedCity={selectedDeliveryCity}
                   label={t.deliveryAddress}
                   placeholder={t.addressLine1Placeholder}
                   value={addressLine1}
@@ -625,16 +695,16 @@ export function PublicOrderPage({
                   <Field label={t.postcode} required>
                     <input
                       value={postcode}
-                      onChange={(event) => setPostcode(event.target.value)}
-                      className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                      readOnly
+                      className="w-full rounded-2xl border border-stone-400 bg-stone-50 px-4 py-3 text-lg text-stone-700 outline-none"
                       placeholder={t.postcodePlaceholder}
                     />
                   </Field>
                   <Field label={t.city} required>
                     <input
                       value={city}
-                      onChange={(event) => setCity(event.target.value)}
-                      className="w-full rounded-2xl border border-stone-400 bg-white px-4 py-3 text-lg outline-none focus:border-stone-700 focus:ring-2 focus:ring-stone-300"
+                      readOnly
+                      className="w-full rounded-2xl border border-stone-400 bg-stone-50 px-4 py-3 text-lg text-stone-700 outline-none"
                       placeholder={t.cityPlaceholder}
                     />
                   </Field>
