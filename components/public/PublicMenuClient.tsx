@@ -24,6 +24,7 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showDeliveryNotice, setShowDeliveryNotice] = useState(orderType === "home_delivery");
 
   useEffect(() => {
     initializeStore();
@@ -107,6 +108,24 @@ export default function PublicMenuClient({ orderType }: PublicMenuClientProps) {
 
   return (
     <div className="public-page-shell min-h-screen bg-[#f7f1e8] text-stone-900">
+      {orderType === "home_delivery" && showDeliveryNotice ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(30,20,12,0.52)] px-4">
+          <div className="w-full max-w-2xl rounded-[2rem] border border-stone-200 bg-white p-6 shadow-[0_24px_60px_rgba(26,16,10,0.24)] md:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-stone-500">{settings.restaurantName}</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-stone-950">{t.deliveryNoticeTitle}</h2>
+            <p className="mt-3 text-base leading-7 text-stone-600">{t.deliveryNoticeMessage}</p>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeliveryNotice(false)}
+                className="inline-flex items-center justify-center rounded-full border border-stone-900 bg-stone-900 px-5 py-3 text-sm font-bold text-white transition-colors duration-150 hover:bg-stone-800"
+              >
+                {t.continueBrowsing}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <PublicHeader
         settings={settings}
         language={language}

@@ -22,6 +22,9 @@ export const translations = {
       "Our kitchen opens daily from 11:30 am to 2:30 pm and again from 6:30 pm to 11:00 pm. You can still browse the menu or continue to the site.",
     seeMenu: "See menu",
     continueBrowsing: "Continue",
+    deliveryNoticeTitle: "Home delivery information",
+    deliveryNoticeMessage:
+      "Home delivery is available in Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer. A minimum order of €50 is required, and a 5% discount is applied to eligible delivery orders.",
     heroLabel: "Marina Signature",
     startOrder: "Start Order",
     ourDishes: "Discover the Menu",
@@ -113,6 +116,9 @@ export const translations = {
       "Notre cuisine est ouverte tous les jours de 11h30 à 14h30 puis de 18h30 à 23h00. Vous pouvez quand même voir le menu ou continuer sur le site.",
     seeMenu: "Voir le menu",
     continueBrowsing: "Continuer",
+    deliveryNoticeTitle: "Informations sur la livraison à domicile",
+    deliveryNoticeMessage:
+      "La livraison à domicile est disponible à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer. Une commande minimum de 50 € est demandée, et une remise de 5 % s'applique aux commandes de livraison éligibles.",
     heroLabel: "Signature Marina",
     startOrder: "Commander",
     ourDishes: "Découvrir la carte",
