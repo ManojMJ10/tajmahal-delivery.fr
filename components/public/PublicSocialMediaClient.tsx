@@ -88,6 +88,7 @@ export default function PublicSocialMediaClient() {
 
   useEffect(() => {
     initializeStore();
+    saveLanguage("fr");
   }, []);
 
   const copy = socialPageCopy[language];

@@ -37,6 +37,7 @@ export default function PublicLandingClient() {
 
   useEffect(() => {
     initializeStore();
+    saveLanguage("fr");
   }, []);
 
   useEffect(() => {

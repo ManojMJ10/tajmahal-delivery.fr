@@ -8,7 +8,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className="min-h-screen bg-[#f6eee3] text-stone-900">
         <main className="mx-auto grid min-h-screen max-w-3xl place-items-center px-6">
           <section className="w-full rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm">
@@ -34,4 +34,3 @@ export default function GlobalError({
     </html>
   );
 }
-
