@@ -17,6 +17,11 @@ const SET_MENU_CATEGORY_IDS = new Set(["tasting-menu", "lunch-menu", "children-m
 export const translations = {
   en: {
     openToday: "Open today",
+    closedNowTitle: "Restaurant is currently closed",
+    closedNowMessage:
+      "Our kitchen opens daily from 11:30 am to 2:30 pm and again from 6:30 pm to 11:00 pm. You can still browse the menu or continue to the site.",
+    seeMenu: "See menu",
+    continueBrowsing: "Continue",
     heroLabel: "Marina Signature",
     startOrder: "Start Order",
     ourDishes: "Discover the Menu",
@@ -103,6 +108,11 @@ export const translations = {
   },
   fr: {
     openToday: "Ouvert aujourd'hui",
+    closedNowTitle: "Le restaurant est actuellement fermé",
+    closedNowMessage:
+      "Notre cuisine est ouverte tous les jours de 11h30 à 14h30 puis de 18h30 à 23h00. Vous pouvez quand même voir le menu ou continuer sur le site.",
+    seeMenu: "Voir le menu",
+    continueBrowsing: "Continuer",
     heroLabel: "Signature Marina",
     startOrder: "Commander",
     ourDishes: "Découvrir la carte",

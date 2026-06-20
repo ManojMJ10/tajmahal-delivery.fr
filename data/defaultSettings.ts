@@ -114,7 +114,7 @@ export const defaultSettings: AppSettings = {
   "publicSite": {
     "phoneNumber": "04 93 73 07 87",
     "restaurantAddress": "The Marina, 1001 Battery Avenue, 06270 Villeneuve-Loubet",
-    "openingHours": "Déjeuner 11:00 - 14:30, Dîner 18:30 - 23:00",
+    "openingHours": "Déjeuner 11:30 - 14:30, Dîner 18:30 - 23:00",
     "deliveryMessage": "Livraison fraîche et soignée à Nice et dans les environs.",
     "takeawayMessage": "Retrait rapide avec emballage chaud et soigné.",
     "dineInMessage": "Salle confortable pour le déjeuner et le service du soir.",
