@@ -32,6 +32,49 @@ interface OrderPageProps {
   t: Record<string, string>;
 }
 
+type OrderDraft = {
+  customerName: string;
+  phoneNumber: string;
+  email: string;
+  addressLine1: string;
+  addressLine2: string;
+  selectedDeliveryCity: string;
+  postcode: string;
+  city: string;
+  guestCount: number;
+  date: string;
+  timeSlot: string;
+  customerNotes: string;
+};
+
+function getOrderDraftStorageKey(orderType: OrderType) {
+  return `tajmahal-order-draft-${orderType}`;
+}
+
+function readOrderDraft(orderType: OrderType): OrderDraft | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(getOrderDraftStorageKey(orderType));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+
+    return parsed && typeof parsed === "object" ? (parsed as OrderDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveOrderDraft(orderType: OrderType, draft: OrderDraft) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(getOrderDraftStorageKey(orderType), JSON.stringify(draft));
+}
+
+function clearOrderDraft(orderType: OrderType) {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(getOrderDraftStorageKey(orderType));
+}
+
 function getCartItems(menuItems: MenuItem[], cart: Record<string, number>) {
   return menuItems.filter((item) => Number(cart[item.id] || 0) > 0);
 }
@@ -653,6 +696,7 @@ export function PublicOrderPage({
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasRestoredDraftRef = useRef(false);
   const isDineIn = orderType === "dine_in";
   const selectedOption =
     orderType === "dine_in" ? t.dineIn : orderType === "takeaway" ? t.takeAway : t.homeDelivery;
@@ -698,8 +742,61 @@ export function PublicOrderPage({
       : orderType === "dine_in"
         ? "✅ Your dine-in reservation has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
         : orderType === "takeaway"
-          ? "✅ Your takeaway order has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
+        ? "✅ Your takeaway order has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
           : "✅ Your delivery order has been sent successfully. Confirmation emails were sent to the customer and the restaurant.";
+
+  useEffect(() => {
+    const draft = readOrderDraft(orderType);
+    hasRestoredDraftRef.current = true;
+
+    if (!draft) return;
+
+    setCustomerName(draft.customerName || "");
+    setPhoneNumber(draft.phoneNumber || "");
+    setEmail(draft.email || "");
+    setAddressLine1(draft.addressLine1 || "");
+    setAddressLine2(draft.addressLine2 || "");
+    setSelectedDeliveryCity(draft.selectedDeliveryCity || "");
+    setPostcode(draft.postcode || "");
+    setCity(draft.city || "");
+    setGuestCount(typeof draft.guestCount === "number" ? draft.guestCount : 2);
+    setDate(draft.date || date);
+    setTimeSlot(draft.timeSlot || "");
+    setCustomerNotes(draft.customerNotes || "");
+  }, [orderType]);
+
+  useEffect(() => {
+    if (!hasRestoredDraftRef.current) return;
+
+    saveOrderDraft(orderType, {
+      customerName,
+      phoneNumber,
+      email,
+      addressLine1,
+      addressLine2,
+      selectedDeliveryCity,
+      postcode,
+      city,
+      guestCount,
+      date,
+      timeSlot,
+      customerNotes,
+    });
+  }, [
+    addressLine1,
+    addressLine2,
+    city,
+    customerName,
+    customerNotes,
+    date,
+    email,
+    guestCount,
+    orderType,
+    phoneNumber,
+    postcode,
+    selectedDeliveryCity,
+    timeSlot,
+  ]);
 
   function syncDeliveryLocation(nextAddress: string, nextSelectedCity?: string) {
     const matchedCityFromAddress = extractAllowedCityFromAddress(nextAddress);
@@ -818,6 +915,7 @@ export function PublicOrderPage({
         throw new Error(result.error || "Unable to send confirmation.");
       }
 
+      clearOrderDraft(orderType);
       setSubmitSuccess(submitSuccessMessage);
       onSubmitSuccess?.();
     } catch (error) {
