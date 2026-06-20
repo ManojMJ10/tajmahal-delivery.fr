@@ -2,10 +2,10 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { defaultMenu } from "@/data/defaultMenu";
 import { defaultSettings } from "@/data/defaultSettings";
-import { isSupportedDeliveryAddress } from "@/lib/deliveryZones";
+import { checkHomeDeliveryEligibility } from "@/lib/deliveryEligibility";
 import { buildOrderConfirmationEmail } from "@/lib/orderEmail";
 import { sendN8nOrderWebhook } from "@/lib/orderWebhook";
-import { translations } from "@/lib/publicContent";
+import { parsePrice, translations } from "@/lib/publicContent";
 import type { OrderConfirmationPayload } from "@/lib/types";
 
 function isValidEmail(value: string) {
@@ -45,6 +45,14 @@ function getEnv() {
   return { apiKey, from, ownerEmail, n8nWebhookUrl, n8nWebhookSecret };
 }
 
+function getCartSubtotal(payload: OrderConfirmationPayload) {
+  return payload.items.reduce((sum, line) => {
+    const item = defaultMenu.find((candidate) => candidate.id === line.itemId);
+    if (!item) return sum;
+    return sum + parsePrice(item.price) * line.quantity;
+  }, 0);
+}
+
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as OrderConfirmationPayload;
@@ -79,11 +87,27 @@ export async function POST(request: Request) {
     const language = payload.language;
     const t = translations[language];
 
-    if (
-      payload.orderType === "home_delivery" &&
-      !isSupportedDeliveryAddress(payload.addressLine1.trim(), payload.addressLine2?.trim() ?? "")
-    ) {
-      return NextResponse.json({ error: t.unsupportedDeliveryArea }, { status: 400 });
+    if (payload.orderType === "home_delivery") {
+      const deliveryEligibility = checkHomeDeliveryEligibility({
+        address: [
+          payload.addressLine1.trim(),
+          payload.addressLine2?.trim() ?? "",
+          payload.postcode.trim(),
+          payload.city.trim(),
+        ]
+          .filter(Boolean)
+          .join(", "),
+        cartTotal: getCartSubtotal(payload),
+      });
+
+      if (!deliveryEligibility.eligible) {
+        const translatedMessage =
+          deliveryEligibility.cartTotal < deliveryEligibility.minimumOrderAmount
+            ? t.homeDeliveryMinimumOrderMessage
+            : t.unsupportedDeliveryArea;
+
+        return NextResponse.json({ error: translatedMessage }, { status: 400 });
+      }
     }
 
     const ownerEmail = buildOrderConfirmationEmail({

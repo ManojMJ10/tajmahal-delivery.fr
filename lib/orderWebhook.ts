@@ -1,3 +1,4 @@
+import { checkHomeDeliveryEligibility } from "@/lib/deliveryEligibility";
 import { formatEuro, getDishName, parsePrice, translations } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload } from "@/lib/types";
 
@@ -66,7 +67,22 @@ export async function sendN8nOrderWebhook({
   }
 
   const items = getItems(payload, menuItems, payload.language);
-  const total = getTotal(items);
+  const subtotal = getTotal(items);
+  const eligibility =
+    payload.orderType === "home_delivery"
+      ? checkHomeDeliveryEligibility({
+          address: [
+            payload.addressLine1,
+            payload.addressLine2,
+            payload.postcode,
+            payload.city,
+          ]
+            .filter(Boolean)
+            .join(", "),
+          cartTotal: subtotal,
+        })
+      : null;
+  const total = eligibility?.eligible ? eligibility.finalTotal : subtotal;
   const totalFormatted = formatEuro(total);
   const orderTypeLabel = getOrderTypeLabel(payload.orderType, payload.language);
 
@@ -100,6 +116,11 @@ export async function sendN8nOrderWebhook({
       address: settings.publicSite.restaurantAddress,
     },
     items,
+    subtotal,
+    subtotalFormatted: formatEuro(subtotal),
+    discountPercent: eligibility?.eligible ? eligibility.discountPercent : 0,
+    discountAmount: eligibility?.eligible ? eligibility.discountAmount : 0,
+    discountAmountFormatted: formatEuro(eligibility?.eligible ? eligibility.discountAmount : 0),
     total,
     totalFormatted,
     whatsappMessage:

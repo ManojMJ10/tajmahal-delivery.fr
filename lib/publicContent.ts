@@ -57,6 +57,8 @@ export const translations = {
     deliveredCitiesHelp: "Choose your delivery area before entering the address.",
     deliveryAddress: "Address Line 1",
     addressLine1Placeholder: "Street address",
+    addressAutocompleteHelp:
+      "Start typing your address. Suggestions are limited to Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer.",
     addressLine2: "Address Line 2",
     addressLine2Placeholder: "Apt, suite, unit, company name",
     postcode: "Postcode",
@@ -82,6 +84,19 @@ export const translations = {
     qty: "Qty",
     price: "Price",
     subtotal: "Subtotal",
+    homeDeliveryDiscount: "Home delivery discount",
+    homeDeliveryAvailable: "Home delivery available",
+    minimumHomeDeliveryOrder: "Minimum order for home delivery is €50",
+    homeDeliveryDiscountApplied: "5% home delivery discount applied",
+    deliveryAvailableOnly:
+      "Delivery available only in Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer",
+    finalTotalAfterDiscount: "Final total after discount",
+    homeDeliveryEligibleMessage:
+      "Good news! Home delivery is available to your address. A 5% home delivery discount has been applied.",
+    homeDeliveryMinimumOrderMessage:
+      "Minimum order for home delivery is €50. Add more items to continue.",
+    homeDeliveryLocationMessage:
+      "Sorry, delivery is currently available only in Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer.",
     total: "Total",
     estimatedTotal: "Estimated total",
     serviceNote:
@@ -106,8 +121,8 @@ export const translations = {
     bilingualMenu: "Bilingual menu",
     english: "English",
     french: "Francais",
-  unsupportedDeliveryArea:
-    "We do not deliver to this address yet. Home delivery is currently available in Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer.",
+    unsupportedDeliveryArea:
+      "Sorry, delivery is currently available only in Villeneuve-Loubet, Antibes, Biot, and Cagnes-sur-Mer.",
   },
   fr: {
     openToday: "Ouvert aujourd'hui",
@@ -151,6 +166,8 @@ export const translations = {
     deliveredCitiesHelp: "Choisissez votre zone de livraison avant de saisir l'adresse.",
     deliveryAddress: "Adresse ligne 1",
     addressLine1Placeholder: "Adresse de rue",
+    addressAutocompleteHelp:
+      "Commencez à saisir votre adresse. Les suggestions sont limitées à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer.",
     addressLine2: "Adresse ligne 2",
     addressLine2Placeholder: "Appartement, étage, bâtiment, société",
     postcode: "Code postal",
@@ -176,6 +193,19 @@ export const translations = {
     qty: "Qté",
     price: "Prix",
     subtotal: "Sous-total",
+    homeDeliveryDiscount: "Remise livraison à domicile",
+    homeDeliveryAvailable: "Livraison à domicile disponible",
+    minimumHomeDeliveryOrder: "Commande minimum de 50€ pour la livraison à domicile",
+    homeDeliveryDiscountApplied: "Remise de 5% appliquée pour la livraison à domicile",
+    deliveryAvailableOnly:
+      "Livraison disponible uniquement à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer",
+    finalTotalAfterDiscount: "Total final après remise",
+    homeDeliveryEligibleMessage:
+      "Bonne nouvelle ! La livraison à domicile est disponible à votre adresse. Une remise de 5 % pour la livraison à domicile a été appliquée.",
+    homeDeliveryMinimumOrderMessage:
+      "Commande minimum de 50€ pour la livraison à domicile. Ajoutez encore des articles pour continuer.",
+    homeDeliveryLocationMessage:
+      "Désolé, la livraison est actuellement disponible uniquement à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer.",
     total: "Total",
     estimatedTotal: "Total estimé",
     serviceNote:
@@ -200,8 +230,8 @@ export const translations = {
     bilingualMenu: "Menu bilingue",
     english: "Anglais",
     french: "Français",
-  unsupportedDeliveryArea:
-    "Nous ne livrons pas encore à cette adresse. La livraison à domicile est actuellement disponible à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer.",
+    unsupportedDeliveryArea:
+      "Désolé, la livraison est actuellement disponible uniquement à Villeneuve-Loubet, Antibes, Biot et Cagnes-sur-Mer.",
   },
 } as const;
 

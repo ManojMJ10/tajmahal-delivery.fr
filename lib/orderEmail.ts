@@ -1,3 +1,4 @@
+import { checkHomeDeliveryEligibility } from "@/lib/deliveryEligibility";
 import { formatEuro, getDishName, parsePrice, translations } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
 
@@ -61,6 +62,35 @@ function getTotal(itemRows: ReturnType<typeof getItemRows>) {
   return itemRows.reduce((sum, row) => sum + parsePrice(row.subtotal), 0);
 }
 
+function getOrderPricing(payload: OrderConfirmationPayload, itemRows: ReturnType<typeof getItemRows>) {
+  const subtotal = getTotal(itemRows);
+
+  if (payload.orderType !== "home_delivery") {
+    return {
+      subtotal,
+      discountAmount: 0,
+      discountPercent: 0,
+      finalTotal: subtotal,
+      eligible: false,
+    };
+  }
+
+  const eligibility = checkHomeDeliveryEligibility({
+    address: [payload.addressLine1, payload.addressLine2, payload.postcode, payload.city]
+      .filter(Boolean)
+      .join(", "),
+    cartTotal: subtotal,
+  });
+
+  return {
+    subtotal,
+    discountAmount: eligibility.discountAmount,
+    discountPercent: eligibility.discountPercent,
+    finalTotal: eligibility.finalTotal,
+    eligible: eligibility.eligible,
+  };
+}
+
 export function buildOrderConfirmationEmail({
   settings,
   payload,
@@ -82,7 +112,8 @@ export function buildOrderConfirmationEmail({
   const t = translations[language];
   const orderLabel = getOrderTypeLabel(payload.orderType, language);
   const itemRows = getItemRows(payload, menuItems, language);
-  const total = formatEuro(getTotal(itemRows));
+  const pricing = getOrderPricing(payload, itemRows);
+  const total = formatEuro(pricing.finalTotal);
   const resolvedOrderRef = orderRef || `TM-${Date.now().toString().slice(-8)}`;
   const introText =
     intro ||
@@ -190,7 +221,21 @@ export function buildOrderConfirmationEmail({
               ${escapeHtml(t.serviceNote)}
             </div>
             <div style="text-align:right;">
-              <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#78716c;font-weight:800;">${escapeHtml(t.total)}</div>
+              <div style="display:flex;justify-content:space-between;gap:20px;font-size:13px;color:#57534e;">
+                <span>${escapeHtml(t.subtotal)}</span>
+                <span>${escapeHtml(formatEuro(pricing.subtotal))}</span>
+              </div>
+              ${
+                pricing.eligible
+                  ? `<div style="display:flex;justify-content:space-between;gap:20px;margin-top:8px;font-size:13px;color:#047857;">
+                <span>${escapeHtml(t.homeDeliveryDiscount)} (${pricing.discountPercent}%)</span>
+                <span>-${escapeHtml(formatEuro(pricing.discountAmount))}</span>
+              </div>`
+                  : ""
+              }
+              <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#78716c;font-weight:800;">${escapeHtml(
+                pricing.eligible ? t.finalTotalAfterDiscount : t.total,
+              )}</div>
               <div style="margin-top:6px;font-size:28px;font-weight:900;color:#111827;">${escapeHtml(total)}</div>
             </div>
           </div>
@@ -223,7 +268,11 @@ export function buildOrderConfirmationEmail({
       row.note ? `${t.itemNote}: ${row.note}` : null,
     ]),
     "",
-    `${t.total}: ${total}`,
+    `${t.subtotal}: ${formatEuro(pricing.subtotal)}`,
+    pricing.eligible
+      ? `${t.homeDeliveryDiscount} (${pricing.discountPercent}%): -${formatEuro(pricing.discountAmount)}`
+      : null,
+    `${pricing.eligible ? t.finalTotalAfterDiscount : t.total}: ${total}`,
   ].filter((line): line is string => Boolean(line));
 
   return {

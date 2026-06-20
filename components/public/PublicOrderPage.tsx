@@ -1,8 +1,18 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, MapPin, Minus, Plus } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
-import { ALLOWED_DELIVERY_CITIES, DELIVERY_CITY_POSTCODES, isSupportedDeliveryAddress } from "@/lib/deliveryZones";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { checkHomeDeliveryEligibility } from "@/lib/deliveryEligibility";
+import {
+  ALLOWED_DELIVERY_CITIES,
+  DELIVERY_CITY_POSTCODES,
+  extractAllowedCityFromAddress,
+  getMockDeliverySuggestions,
+  homeDeliveryDiscountPercent,
+  matchAllowedCity,
+  minimumOrderAmount,
+  type AllowedDeliveryCity,
+} from "@/lib/deliveryZones";
 import { formatEuro, getDishName, getLocalizedCategoryLabel, getSpiceLabel, parsePrice, shouldShowSpiceLevel } from "@/lib/publicContent";
 import type { AppSettings, Language, MenuItem, OrderConfirmationPayload, OrderType } from "@/lib/types";
 import { PublicHeader } from "@/components/public/PublicHeader";
@@ -22,8 +32,6 @@ interface OrderPageProps {
   t: Record<string, string>;
 }
 
-type DeliveryCity = (typeof ALLOWED_DELIVERY_CITIES)[number];
-
 function getCartItems(menuItems: MenuItem[], cart: Record<string, number>) {
   return menuItems.filter((item) => Number(cart[item.id] || 0) > 0);
 }
@@ -37,6 +45,18 @@ function getCartTotal(menuItems: MenuItem[], cart: Record<string, number>) {
     (total, item) => total + parsePrice(item.price) * Number(cart[item.id] || 0),
     0
   );
+}
+
+function buildDeliveryAddress(...parts: string[]) {
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
+function extractPostcode(value: string) {
+  const matched = value.match(/\b\d{5}\b/);
+  return matched?.[0] ?? "";
 }
 
 function Field({
@@ -241,36 +261,123 @@ function AddressSearch({
   selectedCity,
   label,
   placeholder,
+  help,
   value,
   onChange,
+  onSuggestionSelect,
 }: {
   selectedCity: string;
   label: string;
   placeholder: string;
+  help?: string;
   value: string;
   onChange: (value: string) => void;
+  onSuggestionSelect: (value: string) => void;
 }) {
-  const suggestions = [
-    "1001 Av. Jean Marchand, Villeneuve-Loubet, 06270",
-    "15 Avenue de la Mer, Villeneuve-Loubet, 06270",
-    "8 Allee des Bugadieres, Villeneuve-Loubet, 06270",
-    "22 Route de Grasse, Villeneuve-Loubet, 06270",
-    "4 Avenue des Rives, Villeneuve-Loubet, 06270",
-    "12 Boulevard Albert 1er, Antibes, 06600",
-    "6 Avenue Robert Soleau, Antibes, 06600",
-    "18 Route de Valbonne, Biot, 06410",
-    "4 Chemin des Combes, Biot, 06410",
-    "9 Avenue de Nice, Cagnes-sur-Mer, 06800",
-    "17 Boulevard Marechal Juin, Cagnes-sur-Mer, 06800",
-  ].filter(
-    (place) =>
-      (!selectedCity || place.toLowerCase().includes(selectedCity.toLowerCase())) &&
-      place.toLowerCase().includes(value.toLowerCase())
-  );
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
+  const [googleReady, setGoogleReady] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const autocompleteServiceRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!apiKey) return;
+
+    const existingGoogle = (window as Window & { google?: any }).google;
+
+    if (existingGoogle?.maps?.places) {
+      setGoogleReady(true);
+      return;
+    }
+
+    const handleLoad = () => setGoogleReady(true);
+    const existingScript = document.getElementById("google-maps-places-script");
+
+    if (existingScript) {
+      existingScript.addEventListener("load", handleLoad);
+      return () => existingScript.removeEventListener("load", handleLoad);
+    }
+
+    const script = document.createElement("script");
+    script.id = "google-maps-places-script";
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", handleLoad);
+    document.head.appendChild(script);
+
+    return () => {
+      script.removeEventListener("load", handleLoad);
+    };
+  }, [apiKey]);
+
+  useEffect(() => {
+    const googleObject = (window as Window & { google?: any }).google;
+
+    if (googleReady && googleObject?.maps?.places && !autocompleteServiceRef.current) {
+      autocompleteServiceRef.current = new googleObject.maps.places.AutocompleteService();
+    }
+  }, [googleReady]);
+
+  useEffect(() => {
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matchedSelectedCity = selectedCity ? matchAllowedCity(selectedCity) : undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      const googleObject = (window as Window & { google?: any }).google;
+      const autocompleteService = autocompleteServiceRef.current;
+
+      if (googleReady && googleObject?.maps?.places && autocompleteService) {
+        autocompleteService.getPlacePredictions(
+          {
+            input: value,
+            componentRestrictions: { country: "fr" },
+            types: ["address"],
+          },
+          (
+            predictions: Array<{ description: string }> | null,
+            status: string,
+          ) => {
+            if (
+              status !== googleObject.maps.places.PlacesServiceStatus.OK ||
+              !predictions
+            ) {
+              setSuggestions(getMockDeliverySuggestions(value, selectedCity));
+              return;
+            }
+
+            const filteredPredictions = predictions
+              .map((prediction) => prediction.description)
+              .filter((description) => {
+                const matchedCity = extractAllowedCityFromAddress(description);
+                if (!matchedCity) return false;
+                return matchedSelectedCity ? matchedCity === matchedSelectedCity : true;
+              })
+              .slice(0, 6);
+
+            setSuggestions(
+              filteredPredictions.length > 0
+                ? filteredPredictions
+                : getMockDeliverySuggestions(value, selectedCity),
+            );
+          },
+        );
+
+        return;
+      }
+
+      setSuggestions(getMockDeliverySuggestions(value, selectedCity));
+    }, 180);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [googleReady, selectedCity, value]);
 
   return (
     <div className="grid gap-5 md:col-span-2">
-      <Field label={label} required>
+      <Field label={label} required help={help}>
         <div className="relative">
           <input
             value={value}
@@ -284,7 +391,7 @@ function AddressSearch({
                 <button
                   key={place}
                   type="button"
-                  onClick={() => onChange(place)}
+                  onClick={() => onSuggestionSelect(place)}
                   className="flex w-full items-center gap-2 px-4 py-3 text-left text-base text-stone-900 hover:bg-stone-50"
                 >
                   <MapPin className="h-4 w-4 text-stone-400" />
@@ -305,7 +412,7 @@ function DeliveryCityPicker({
   t,
 }: {
   selectedCity: string;
-  onSelect: (city: DeliveryCity) => void;
+  onSelect: (city: AllowedDeliveryCity) => void;
   t: Record<string, string>;
 }) {
   return (
@@ -346,6 +453,8 @@ function CartSummary({
   notes,
   onNoteChange,
   language,
+  orderType,
+  deliveryEligibility,
   t,
 }: {
   settings: AppSettings;
@@ -354,10 +463,15 @@ function CartSummary({
   notes: Record<string, string>;
   onNoteChange: (itemId: string, value: string) => void;
   language: Language;
+  orderType: OrderType;
+  deliveryEligibility: ReturnType<typeof checkHomeDeliveryEligibility>;
   t: Record<string, string>;
 }) {
   const items = getCartItems(menuItems, cart);
-  const total = getCartTotal(menuItems, cart);
+  const subtotal = getCartTotal(menuItems, cart);
+  const isEligibleHomeDelivery =
+    orderType === "home_delivery" && deliveryEligibility.eligible;
+  const total = isEligibleHomeDelivery ? deliveryEligibility.finalTotal : subtotal;
 
   if (items.length === 0) {
     return <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">{t.emptyCart}</div>;
@@ -423,12 +537,86 @@ function CartSummary({
         })}
       </div>
       <div className="border-t border-stone-200 bg-stone-50 px-5 py-4">
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-black text-stone-950">{t.total}</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-semibold text-stone-700">
+            <span>{t.subtotal}</span>
+            <span>{formatEuro(subtotal)}</span>
+          </div>
+          {isEligibleHomeDelivery ? (
+            <div className="flex items-center justify-between text-sm font-semibold text-emerald-700">
+              <span>
+                {t.homeDeliveryDiscount} ({homeDeliveryDiscountPercent}%)
+              </span>
+              <span>-{formatEuro(deliveryEligibility.discountAmount)}</span>
+            </div>
+          ) : null}
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-lg font-black text-stone-950">
+            {isEligibleHomeDelivery ? t.finalTotalAfterDiscount : t.total}
+          </span>
           <span className="text-2xl font-black text-stone-950">{formatEuro(total)}</span>
         </div>
         <p className="mt-2 text-xs text-stone-500">{t.serviceNote}</p>
       </div>
+    </div>
+  );
+}
+
+function DeliveryEligibilityCard({
+  eligibility,
+  hasAddressInput,
+  t,
+}: {
+  eligibility: ReturnType<typeof checkHomeDeliveryEligibility>;
+  hasAddressInput: boolean;
+  t: Record<string, string>;
+}) {
+  if (!hasAddressInput) return null;
+
+  const statusMessage = eligibility.eligible
+    ? t.homeDeliveryEligibleMessage
+    : eligibility.cartTotal < eligibility.minimumOrderAmount
+      ? t.homeDeliveryMinimumOrderMessage
+      : t.homeDeliveryLocationMessage;
+  const statusTitle = eligibility.eligible
+    ? t.homeDeliveryAvailable
+    : eligibility.cartTotal < eligibility.minimumOrderAmount
+      ? t.minimumHomeDeliveryOrder
+      : t.deliveryAvailableOnly;
+
+  const statusClassName = eligibility.eligible
+    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+    : "border-amber-200 bg-amber-50 text-amber-900";
+
+  return (
+    <div className={`rounded-2xl border px-5 py-4 ${statusClassName} md:col-span-2`}>
+      <p className="text-base font-black">{statusTitle}</p>
+      <p className="mt-2 text-sm leading-6">{statusMessage}</p>
+      {eligibility.eligible ? (
+        <div className="mt-4 grid gap-3 rounded-2xl border border-emerald-200 bg-white/80 p-4 text-sm text-stone-800 md:grid-cols-3">
+          <div>
+            <p className="font-bold text-stone-500">{t.subtotal}</p>
+            <p className="mt-1 text-lg font-black text-stone-950">
+              {formatEuro(eligibility.cartTotal)}
+            </p>
+          </div>
+          <div>
+            <p className="font-bold text-stone-500">
+              {t.homeDeliveryDiscountApplied}
+            </p>
+            <p className="mt-1 text-lg font-black text-emerald-700">
+              -{formatEuro(eligibility.discountAmount)}
+            </p>
+          </div>
+          <div>
+            <p className="font-bold text-stone-500">{t.finalTotalAfterDiscount}</p>
+            <p className="mt-1 text-lg font-black text-stone-950">
+              {formatEuro(eligibility.finalTotal)}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -472,7 +660,33 @@ export function PublicOrderPage({
   const emailHelp = isDineIn ? t.reservationHelp : t.receiptHelp;
   const submitLabel = isDineIn ? t.sendReservationConfirmation : t.sendConfirmation;
   const cartItems = useMemo(() => getCartItems(menuItems, cart), [menuItems, cart]);
-  const canSubmit = isDineIn ? true : cartItems.length > 0;
+  const cartTotal = useMemo(() => getCartTotal(menuItems, cart), [menuItems, cart]);
+  const deliveryAddress = useMemo(
+    () =>
+      buildDeliveryAddress(
+        addressLine1,
+        addressLine2,
+        city || selectedDeliveryCity,
+        postcode,
+      ),
+    [addressLine1, addressLine2, city, postcode, selectedDeliveryCity],
+  );
+  const deliveryEligibility = useMemo(
+    () =>
+      checkHomeDeliveryEligibility({
+        address: deliveryAddress,
+        cartTotal,
+      }),
+    [cartTotal, deliveryAddress],
+  );
+  const hasDeliveryAddressInput = Boolean(addressLine1.trim());
+  const canSubmitHomeDelivery =
+    addressLine1.trim().length > 0 && deliveryEligibility.eligible;
+  const canSubmit = isDineIn
+    ? true
+    : orderType === "home_delivery"
+      ? cartItems.length > 0 && canSubmitHomeDelivery
+      : cartItems.length > 0;
   const needsMenuSelection = !isDineIn && cartItems.length === 0;
   const submitSuccessMessage =
     language === "fr"
@@ -486,6 +700,38 @@ export function PublicOrderPage({
         : orderType === "takeaway"
           ? "✅ Your takeaway order has been sent successfully. Confirmation emails were sent to the customer and the restaurant."
           : "✅ Your delivery order has been sent successfully. Confirmation emails were sent to the customer and the restaurant.";
+
+  function syncDeliveryLocation(nextAddress: string, nextSelectedCity?: string) {
+    const matchedCityFromAddress = extractAllowedCityFromAddress(nextAddress);
+    const fallbackCity =
+      nextAddress.includes(",") || extractPostcode(nextAddress)
+        ? undefined
+        : matchAllowedCity(nextSelectedCity || selectedDeliveryCity || city);
+    const matchedCity = matchedCityFromAddress || fallbackCity;
+
+    if (!matchedCity) {
+      setSelectedDeliveryCity("");
+      setCity("");
+      setPostcode("");
+      return;
+    }
+
+    setSelectedDeliveryCity(matchedCity);
+    setCity(matchedCity);
+    setPostcode(extractPostcode(nextAddress) || DELIVERY_CITY_POSTCODES[matchedCity]);
+  }
+
+  function handleAddressInput(nextAddress: string) {
+    setAddressLine1(nextAddress);
+    syncDeliveryLocation(nextAddress);
+  }
+
+  function handleDeliveryCitySelection(nextCity: AllowedDeliveryCity) {
+    setSelectedDeliveryCity(nextCity);
+    setCity(nextCity);
+    setPostcode(DELIVERY_CITY_POSTCODES[nextCity]);
+    syncDeliveryLocation(addressLine1, nextCity);
+  }
 
   async function submitOrder() {
     setSubmitError("");
@@ -516,11 +762,12 @@ export function PublicOrderPage({
       return;
     }
 
-    if (
-      orderType === "home_delivery" &&
-      !isSupportedDeliveryAddress(addressLine1.trim(), addressLine2.trim())
-    ) {
-      setSubmitError(t.unsupportedDeliveryArea);
+    if (orderType === "home_delivery" && !deliveryEligibility.eligible) {
+      setSubmitError(
+        deliveryEligibility.cartTotal < deliveryEligibility.minimumOrderAmount
+          ? t.homeDeliveryMinimumOrderMessage
+          : t.unsupportedDeliveryArea,
+      );
       return;
     }
 
@@ -650,6 +897,8 @@ export function PublicOrderPage({
                   notes={notes}
                   onNoteChange={onNoteChange}
                   language={language}
+                  orderType={orderType}
+                  deliveryEligibility={deliveryEligibility}
                   t={t}
                 />
               </div>
@@ -674,19 +923,17 @@ export function PublicOrderPage({
               <>
                 <DeliveryCityPicker
                   selectedCity={selectedDeliveryCity}
-                  onSelect={(selectedCity) => {
-                    setSelectedDeliveryCity(selectedCity);
-                    setCity(selectedCity);
-                    setPostcode(DELIVERY_CITY_POSTCODES[selectedCity]);
-                  }}
+                  onSelect={handleDeliveryCitySelection}
                   t={t}
                 />
                 <AddressSearch
                   selectedCity={selectedDeliveryCity}
                   label={t.deliveryAddress}
                   placeholder={t.addressLine1Placeholder}
+                  help={t.addressAutocompleteHelp}
                   value={addressLine1}
-                  onChange={setAddressLine1}
+                  onChange={handleAddressInput}
+                  onSuggestionSelect={handleAddressInput}
                 />
                 <Field label={t.addressLine2} required>
                   <input
@@ -714,6 +961,11 @@ export function PublicOrderPage({
                     />
                   </Field>
                 </div>
+                <DeliveryEligibilityCard
+                  eligibility={deliveryEligibility}
+                  hasAddressInput={hasDeliveryAddressInput}
+                  t={t}
+                />
               </>
             ) : null}
             {orderType === "dine_in" || orderType === "takeaway" ? (
@@ -750,7 +1002,7 @@ export function PublicOrderPage({
           <button
             type="button"
             onClick={submitOrder}
-            disabled={isSubmitting || needsMenuSelection}
+            disabled={isSubmitting || needsMenuSelection || !canSubmit}
             className="mt-6 rounded-full bg-stone-900 px-8 py-3 font-bold text-white transition-colors duration-150 hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >
             {isSubmitting ? t.sending : submitLabel}
