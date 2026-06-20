@@ -62,6 +62,18 @@ export default function PublicOrderClient({ orderType }: PublicOrderClientProps)
           notes: nextNotes,
         });
       }}
+      onRemoveItem={(itemId) => {
+        const nextCart = { ...cart };
+        const nextNotes = { ...notes };
+
+        delete nextCart[itemId];
+        delete nextNotes[itemId];
+
+        savePublicCartState({
+          cart: nextCart,
+          notes: nextNotes,
+        });
+      }}
       orderType={orderType}
       backLabel={backLabel}
       onSubmitSuccess={() => {

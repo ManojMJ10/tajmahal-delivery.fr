@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, MapPin, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Minus, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { checkHomeDeliveryEligibility } from "@/lib/deliveryEligibility";
 import {
@@ -26,6 +26,7 @@ interface OrderPageProps {
   setLanguage: (language: Language) => void;
   onBack: () => void;
   onNoteChange: (itemId: string, value: string) => void;
+  onRemoveItem: (itemId: string) => void;
   orderType: OrderType;
   backLabel?: string;
   onSubmitSuccess?: () => void;
@@ -495,6 +496,7 @@ function CartSummary({
   cart,
   notes,
   onNoteChange,
+  onRemoveItem,
   language,
   orderType,
   deliveryEligibility,
@@ -505,6 +507,7 @@ function CartSummary({
   cart: Record<string, number>;
   notes: Record<string, string>;
   onNoteChange: (itemId: string, value: string) => void;
+  onRemoveItem: (itemId: string) => void;
   language: Language;
   orderType: OrderType;
   deliveryEligibility: ReturnType<typeof checkHomeDeliveryEligibility>;
@@ -543,7 +546,7 @@ function CartSummary({
           const subtotal = unitPrice * quantity;
 
           return (
-            <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_80px_180px_100px_120px] md:items-center">
+            <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1fr_80px_180px_100px_120px_64px] md:items-center">
               <div className="flex items-center gap-3">
                 <img src={item.image} alt={getDishName(item, language)} className="h-14 w-14 rounded-2xl object-cover" />
                 <div>
@@ -574,6 +577,16 @@ function CartSummary({
               <div className="flex justify-between text-sm md:block md:text-right">
                 <span className="font-bold text-stone-500 md:hidden">{t.subtotal}</span>
                 <span className="font-black text-stone-950">{formatEuro(subtotal)}</span>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => onRemoveItem(item.id)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 transition-colors duration-150 hover:bg-rose-100"
+                  aria-label={language === "fr" ? "Supprimer l'article" : "Delete item"}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           );
@@ -673,6 +686,7 @@ export function PublicOrderPage({
   setLanguage,
   onBack,
   onNoteChange,
+  onRemoveItem,
   orderType,
   backLabel,
   onSubmitSuccess,
@@ -994,6 +1008,7 @@ export function PublicOrderPage({
                   cart={cart}
                   notes={notes}
                   onNoteChange={onNoteChange}
+                  onRemoveItem={onRemoveItem}
                   language={language}
                   orderType={orderType}
                   deliveryEligibility={deliveryEligibility}
