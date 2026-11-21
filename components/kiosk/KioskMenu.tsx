@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initializeStore, saveLanguage, useLanguage, useMenuItems, useSettings } from "@/lib/menuStore";
+import { initializeStore, useMenuItems, useSettings } from "@/lib/menuStore";
 import { getLocalizedCategoryLabel, translations } from "@/lib/publicContent";
-import type { MenuItem } from "@/lib/types";
+import type { Language, MenuItem } from "@/lib/types";
 import { KioskDishCard } from "@/components/kiosk/KioskDishCard";
 import { KioskHero } from "@/components/kiosk/KioskHero";
 
@@ -14,7 +14,7 @@ function pickVisibleDishes(menuItems: MenuItem[]) {
 export default function KioskMenu() {
   const settings = useSettings();
   const menuItems = useMenuItems();
-  const language = useLanguage();
+  const [language, setLanguage] = useState<Language>("fr");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const categorySectionRef = useRef<HTMLElement | null>(null);
   const [showCompactCategory, setShowCompactCategory] = useState(false);
@@ -74,7 +74,7 @@ export default function KioskMenu() {
         <KioskHero
           settings={settings}
           language={language}
-          setLanguage={saveLanguage}
+          setLanguage={setLanguage}
         />
 
         {showCompactCategory ? (
@@ -92,12 +92,14 @@ export default function KioskMenu() {
         <section className="rounded-[2rem] border-2 border-[#7f4a1f]/20 bg-[#fff8ef] p-5 shadow-[0_18px_45px_rgba(82,50,19,0.10)]">
           <div className="mb-4">
             <p className="text-sm font-black uppercase tracking-[0.3em] text-[#8f5525]">
-              Poster Space
+              {language === "fr" ? "Espace publicitaire" : "Poster Space"}
             </p>
           </div>
           <div className="grid place-items-center rounded-[1.75rem] border-2 border-dashed border-[#d9c4a6] bg-white/80 p-4">
             <div className="grid aspect-[4/5] w-full max-w-[560px] place-items-center rounded-[1.5rem] border-2 border-[#e2cfb2] bg-[#f8f0e2] text-center text-stone-500">
-              <span className="px-6 text-2xl font-semibold">Advertisement Poster</span>
+              <span className="px-6 text-2xl font-semibold">
+                {language === "fr" ? "Affiche publicitaire" : "Advertisement Poster"}
+              </span>
             </div>
           </div>
         </section>

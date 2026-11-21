@@ -10,9 +10,10 @@ import {
   Music2,
   Star,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { socialLinks } from "@/data/socialLinks";
-import { initializeStore, saveLanguage, useLanguage, useSettings } from "@/lib/menuStore";
+import { initializeStore, useSettings } from "@/lib/menuStore";
+import type { Language } from "@/lib/types";
 
 const socialPageCopy = {
   en: {
@@ -84,11 +85,10 @@ function SocialButton({
 
 export default function PublicSocialMediaClient() {
   const settings = useSettings();
-  const language = useLanguage();
+  const [language, setLanguage] = useState<Language>("fr");
 
   useEffect(() => {
     initializeStore();
-    saveLanguage("fr");
   }, []);
 
   const copy = socialPageCopy[language];
@@ -118,7 +118,7 @@ export default function PublicSocialMediaClient() {
 
             <button
               type="button"
-              onClick={() => saveLanguage(language === "fr" ? "en" : "fr")}
+              onClick={() => setLanguage(language === "fr" ? "en" : "fr")}
               className="rounded-full border border-stone-300 px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] text-stone-700"
             >
               {copy.switchLabel}
